@@ -1,0 +1,3456 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanțe Personale</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161b24;
+    --card: #1c2333;
+    --border: #252e42;
+    --accent-green: #00e5a0;
+    --accent-red: #ff4d6d;
+    --accent-blue: #4d9fff;
+    --accent-gold: #f0b429;
+    --text-primary: #e8edf5;
+    --text-secondary: #7a8599;
+    --text-muted: #4a5568;
+    --font-display: 'Playfair Display', serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .date-display {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Summary Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .summary-card.income::before { background: var(--accent-green); }
+  .summary-card.expense::before { background: var(--accent-red); }
+  .summary-card.balance::before { background: linear-gradient(90deg, var(--accent-green), var(--accent-blue)); }
+
+  .summary-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .card-amount {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -1px;
+  }
+
+  .income .card-amount { color: var(--accent-green); }
+  .expense .card-amount { color: var(--accent-red); }
+  .balance .card-amount { color: var(--text-primary); }
+
+  .card-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-family: var(--font-mono);
+  }
+
+  .card-icon {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-size: 24px;
+    opacity: 0.2;
+  }
+
+  /* Main layout */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Transaction list */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  .filter-tab {
+    padding: 5px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+
+  .filter-tab.active {
+    background: var(--border);
+    color: var(--text-primary);
+  }
+
+  .transactions-list {
+    max-height: 480px;
+    overflow-y: auto;
+  }
+
+  .transactions-list::-webkit-scrollbar { width: 4px; }
+  .transactions-list::-webkit-scrollbar-track { background: transparent; }
+  .transactions-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .transaction-item:hover {
+    background: rgba(255,255,255,0.03);
+  }
+
+  .transaction-item:last-child { border-bottom: none; }
+
+  .tx-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+
+  .tx-icon.income-icon { background: rgba(0,229,160,0.12); }
+  .tx-icon.expense-icon { background: rgba(255,77,109,0.12); }
+
+  .tx-info { flex: 1; min-width: 0; }
+
+  .tx-desc {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tx-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  .tx-right {
+    text-align: right;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+
+  .tx-amount {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .tx-amount.pos { color: var(--accent-green); }
+  .tx-amount.neg { color: var(--accent-red); }
+
+  .tx-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-left: 8px;
+    transition: all 0.15s;
+    opacity: 0;
+  }
+
+  .transaction-item:hover .tx-delete { opacity: 1; }
+  .tx-delete:hover { background: rgba(255,77,109,0.15); color: var(--accent-red); }
+
+  .empty-state {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  /* Add transaction form */
+  .form-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+  }
+
+  .type-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .type-btn {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .type-btn.income-btn.selected {
+    border-color: var(--accent-green);
+    background: rgba(0,229,160,0.1);
+    color: var(--accent-green);
+  }
+
+  .type-btn.expense-btn.selected {
+    border-color: var(--accent-red);
+    background: rgba(255,77,109,0.1);
+    color: var(--accent-red);
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .form-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .form-input, .form-select {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: border-color 0.15s;
+    outline: none;
+    width: 100%;
+  }
+
+  .form-input:focus, .form-select:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .form-input::placeholder { color: var(--text-muted); }
+  .form-select option { background: var(--surface); }
+
+  .amount-wrapper {
+    position: relative;
+  }
+
+  .currency-prefix {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 14px;
+  }
+
+  .amount-wrapper .form-input { padding-left: 44px; }
+
+  .submit-btn {
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    color: #0d0f14;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.15s, transform 0.15s;
+    margin-top: 4px;
+  }
+
+  .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(0); }
+
+  /* Category chips */
+  .cat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Chart bar */
+  .chart-section {
+    margin-top: 24px;
+  }
+
+  .chart-title {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .month-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .month-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .month-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .bar-track {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .month-val {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  /* Category breakdown */
+  .cat-breakdown {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .cat-row:last-child { border-bottom: none; }
+
+  .cat-info { display: flex; align-items: center; gap: 10px; }
+
+  .cat-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .cat-name { font-size: 13px; color: var(--text-secondary); }
+  .cat-pct { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+  .cat-total { font-family: var(--font-mono); font-size: 13px; }
+
+  /* Weekly Budget */
+  .week-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .week-nav-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px 10px;
+    font-size: 14px;
+    transition: all 0.15s;
+  }
+
+  .week-nav-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  .week-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .budget-body { padding: 20px 24px; }
+
+  .budget-status-banner {
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid;
+    transition: all 0.3s;
+  }
+
+  .budget-status-banner.ok {
+    background: rgba(0,229,160,0.08);
+    border-color: rgba(0,229,160,0.25);
+    color: var(--accent-green);
+  }
+
+  .budget-status-banner.warn {
+    background: rgba(240,180,41,0.08);
+    border-color: rgba(240,180,41,0.25);
+    color: var(--accent-gold);
+  }
+
+  .budget-status-banner.over {
+    background: rgba(255,77,109,0.08);
+    border-color: rgba(255,77,109,0.35);
+    color: var(--accent-red);
+  }
+
+  .banner-icon { font-size: 20px; }
+
+  .budget-row {
+    margin-bottom: 18px;
+  }
+
+  .budget-row-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .budget-cat-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .budget-amounts {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .budget-amounts .spent { color: var(--text-primary); font-weight: 500; }
+  .budget-amounts .over-amt { color: var(--accent-red); font-weight: 600; }
+
+  .budget-track {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .budget-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+  }
+
+  .budget-add-row {
+    display: grid;
+    grid-template-columns: 1fr 120px auto;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    align-items: end;
+  }
+
+  .budget-add-row .form-input,
+  .budget-add-row .form-select {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  .budget-add-btn {
+    padding: 9px 14px;
+    background: var(--border);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+    white-space: nowrap;
+  }
+
+  .budget-add-btn:hover { background: var(--accent-blue); color: #0d0f14; border-color: var(--accent-blue); }
+
+  .budget-delete {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    opacity: 0;
+    margin-left: 6px;
+  }
+
+  .budget-row:hover .budget-delete { opacity: 1; }
+  .budget-delete:hover { background: rgba(255,77,109,0.15); color: var(--accent-red); }
+
+  /* Debts Section */
+  .debts-section {
+    margin-top: 32px;
+  }
+
+  .debts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .debt-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+    transition: border-color 0.2s, transform 0.2s;
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  .debt-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.1);
+  }
+
+  .debt-card.overdue {
+    border-color: rgba(255,77,109,0.4);
+    background: rgba(255,77,109,0.04);
+  }
+
+  .debt-card.paid {
+    opacity: 0.5;
+    border-style: dashed;
+  }
+
+  .debt-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .debt-type-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .debt-type-badge.owe {
+    background: rgba(255,77,109,0.15);
+    color: var(--accent-red);
+  }
+
+  .debt-type-badge.owed {
+    background: rgba(0,229,160,0.12);
+    color: var(--accent-green);
+  }
+
+  .debt-card-actions {
+    display: flex;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .debt-card:hover .debt-card-actions { opacity: 1; }
+
+  .debt-action-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 3px 8px;
+    font-size: 12px;
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+
+  .debt-action-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+  .debt-action-btn.del:hover { border-color: var(--accent-red); color: var(--accent-red); }
+
+  .debt-person {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .debt-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    line-height: 1.4;
+  }
+
+  .debt-amount {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .debt-card.overdue .debt-amount,
+  .debt-amount.owe { color: var(--accent-red); }
+  .debt-amount.owed { color: var(--accent-green); }
+
+  .debt-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .debt-due {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .debt-due.overdue { color: var(--accent-red); }
+  .debt-due.soon { color: var(--accent-gold); }
+
+  .debt-paid-stamp {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%) rotate(-15deg);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--accent-green);
+    opacity: 0.25;
+    letter-spacing: 3px;
+    pointer-events: none;
+    border: 3px solid var(--accent-green);
+    padding: 4px 12px;
+    border-radius: 6px;
+  }
+
+  .debts-summary-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .debt-summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dsc-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .dsc-icon.red { background: rgba(255,77,109,0.12); }
+  .dsc-icon.green { background: rgba(0,229,160,0.1); }
+
+  .dsc-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; letter-spacing: 0.5px; }
+  .dsc-val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; }
+  .dsc-val.red { color: var(--accent-red); }
+  .dsc-val.green { color: var(--accent-green); }
+
+  .debts-add-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+  }
+
+  .debts-add-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .debt-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .debt-form-grid .form-input,
+  .debt-form-grid .form-select {
+    font-size: 13px;
+    padding: 10px 12px;
+  }
+
+  .debt-type-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .debt-type-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text-muted);
+  }
+
+  .debt-type-btn.owe-btn.active {
+    border-color: var(--accent-red);
+    background: rgba(255,77,109,0.1);
+    color: var(--accent-red);
+  }
+
+  .debt-type-btn.owed-btn.active {
+    border-color: var(--accent-green);
+    background: rgba(0,229,160,0.1);
+    color: var(--accent-green);
+  }
+
+  .debt-submit-btn {
+    width: 100%;
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #ff4d6d, #f0b429);
+    color: #0d0f14;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    margin-top: 4px;
+  }
+
+  .debt-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .debts-filter-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .main-grid { grid-template-columns: 1fr; }
+    .card-amount { font-size: 22px; }
+    .debts-grid { grid-template-columns: 1fr; }
+    .two-col-section { grid-template-columns: 1fr !important; }
+  }
+
+  /* Two-col bottom sections */
+  .two-col-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* ── FOND ZILE NEGRE ── */
+  .savings-goal-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0 8px;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 16px;
+  }
+
+  .ring-svg { transform: rotate(-90deg); }
+
+  .ring-bg { fill: none; stroke: var(--border); stroke-width: 12; }
+  .ring-fill {
+    fill: none;
+    stroke-width: 12;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1), stroke 0.4s;
+  }
+
+  .ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring-pct {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .ring-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .savings-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+    padding: 0 20px 16px;
+  }
+
+  .sstat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+
+  .sstat-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .sstat-val { font-family: var(--font-mono); font-size: 15px; font-weight: 500; }
+
+  .savings-config {
+    padding: 0 20px 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .savings-config-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .pct-btn-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .pct-btn {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .pct-btn:hover, .pct-btn.active {
+    border-color: var(--accent-gold);
+    background: rgba(240,180,41,0.12);
+    color: var(--accent-gold);
+  }
+
+  .savings-submit-btn {
+    padding: 11px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-gold), #f97316);
+    color: #0d0f14;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    width: 100%;
+  }
+
+  .savings-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .savings-history {
+    padding: 0 20px 16px;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .savings-history::-webkit-scrollbar { width: 4px; }
+  .savings-history::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .sh-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  .sh-item:last-child { border-bottom: none; }
+  .sh-desc { color: var(--text-secondary); }
+  .sh-amt { font-family: var(--font-mono); color: var(--accent-gold); }
+  .sh-date { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-left: 10px; }
+
+  .sh-delete {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 12px; padding: 2px 6px;
+    border-radius: 4px; transition: all 0.15s; opacity: 0; margin-left: 6px;
+  }
+  .sh-item:hover .sh-delete { opacity: 1; }
+  .sh-delete:hover { background: rgba(255,77,109,0.15); color: var(--accent-red); }
+
+  /* ── INVESTIȚII ── */
+  .inv-summary-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .inv-stat {
+    text-align: center;
+  }
+
+  .inv-stat-label { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .inv-stat-val { font-family: var(--font-mono); font-size: 16px; font-weight: 500; }
+  .inv-stat-val.up { color: var(--accent-green); }
+  .inv-stat-val.down { color: var(--accent-red); }
+  .inv-stat-val.blue { color: var(--accent-blue); }
+
+  .inv-list {
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  .inv-list::-webkit-scrollbar { width: 4px; }
+  .inv-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .inv-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    animation: slideIn 0.3s ease forwards;
+  }
+
+  .inv-item:hover { background: rgba(255,255,255,0.02); }
+  .inv-item:last-child { border-bottom: none; }
+
+  .inv-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(77,159,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .inv-info { flex: 1; min-width: 0; }
+  .inv-name { font-size: 14px; font-weight: 500; }
+  .inv-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px; }
+
+  .inv-right { text-align: right; flex-shrink: 0; }
+  .inv-val { font-family: var(--font-mono); font-size: 14px; font-weight: 500; color: var(--accent-blue); }
+  .inv-profit { font-family: var(--font-mono); font-size: 11px; margin-top: 2px; }
+  .inv-profit.pos { color: var(--accent-green); }
+  .inv-profit.neg { color: var(--accent-red); }
+
+  .inv-delete {
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; font-size: 12px; padding: 2px 8px;
+    border-radius: 4px; transition: all 0.15s; opacity: 0; margin-left: 8px;
+  }
+
+  .inv-item:hover .inv-delete { opacity: 1; }
+  .inv-delete:hover { background: rgba(255,77,109,0.15); color: var(--accent-red); }
+
+  .inv-add-form {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .inv-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+
+  .inv-form-grid .form-input,
+  .inv-form-grid .form-select {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  .inv-type-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .inv-chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .inv-chip.active {
+    border-color: var(--accent-blue);
+    background: rgba(77,159,255,0.12);
+    color: var(--accent-blue);
+  }
+
+  .inv-submit-btn {
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, var(--accent-blue), #7c3aed);
+    color: #fff;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .inv-submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,160,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,160,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px 64px;
+  }
+
+  /* NAV */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo span { font-weight: 400; opacity: 0.6; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .back-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  /* Period selector */
+  .period-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+  }
+
+  .period-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .period-tab {
+    padding: 7px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.15s;
+    font-family: var(--font-body);
+  }
+
+  .period-tab.active {
+    background: var(--border);
+    color: var(--text-primary);
+  }
+
+  /* KPI row */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+  }
+
+  .kpi-card:hover { transform: translateY(-2px); }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi-card:nth-child(1)::before { background: var(--accent-green); }
+  .kpi-card:nth-child(2)::before { background: var(--accent-red); }
+  .kpi-card:nth-child(3)::before { background: linear-gradient(90deg,var(--accent-green),var(--accent-blue)); }
+  .kpi-card:nth-child(4)::before { background: var(--accent-blue); }
+  .kpi-card:nth-child(5)::before { background: var(--accent-gold); }
+
+  .kpi-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .kpi-val {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    font-family: var(--font-mono);
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .panel-sub { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  /* Layout grids */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .row-full { margin-bottom: 20px; }
+
+  /* BAR CHART */
+  .bar-chart {
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .bar-month-group {
+    display: grid;
+    grid-template-columns: 52px 1fr 52px;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+  }
+
+  .bar-month-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .bar-track-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .bar-track {
+    height: 7px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.7s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .bar-month-val {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: left;
+  }
+
+  /* DONUT CHART */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px 22px;
+    flex-wrap: wrap;
+  }
+
+  .donut-svg-wrap { position: relative; flex-shrink: 0; }
+
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .donut-center-val {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  .donut-center-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  .donut-legend {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .legend-left { display: flex; align-items: center; gap: 8px; }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .legend-name { color: var(--text-secondary); }
+
+  .legend-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legend-pct { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+  .legend-val { font-family: var(--font-mono); font-size: 12px; }
+
+  /* LINE CHART (SVG) */
+  .line-chart-wrap {
+    padding: 20px 22px 10px;
+    overflow-x: auto;
+  }
+
+  .line-svg { overflow: visible; }
+
+  /* TREND TABLE */
+  .trend-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .trend-table th {
+    padding: 10px 16px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trend-table td {
+    padding: 10px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .trend-table tr:last-child td { border-bottom: none; }
+  .trend-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .trend-td-mono { font-family: var(--font-mono); font-size: 12px; }
+  .green { color: var(--accent-green); }
+  .red { color: var(--accent-red); }
+  .gold { color: var(--accent-gold); }
+  .blue { color: var(--accent-blue); }
+
+  /* SAVING RATE METER */
+  .meter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .meter-label { font-size: 13px; color: var(--text-secondary); width: 120px; flex-shrink: 0; }
+
+  .meter-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .meter-bar { height: 100%; border-radius: 4px; transition: width 0.7s cubic-bezier(0.4,0,0.2,1); }
+
+  .meter-val { font-family: var(--font-mono); font-size: 12px; width: 80px; text-align: right; flex-shrink: 0; }
+
+  /* HEATMAP */
+  .heatmap-wrap { padding: 16px 22px 20px; overflow-x: auto; }
+  .heatmap-grid { display: flex; gap: 3px; }
+  .heatmap-col { display: flex; flex-direction: column; gap: 3px; }
+  .heatmap-cell {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    background: var(--border);
+    transition: transform 0.1s;
+    cursor: default;
+    position: relative;
+  }
+  .heatmap-cell:hover { transform: scale(1.4); z-index: 10; }
+  .heatmap-month-labels { display: flex; gap: 3px; margin-bottom: 4px; }
+  .heatmap-month-label { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); width: 14px; text-align: center; overflow: visible; white-space: nowrap; }
+
+  /* SPARKLINES */
+  .sparkline-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: default;
+    transition: background 0.15s;
+  }
+
+  .sparkline-row:hover { background: rgba(255,255,255,0.02); }
+  .sparkline-row:last-child { border-bottom: none; }
+
+  .spark-icon { font-size: 18px; width: 28px; flex-shrink: 0; }
+  .spark-info { flex: 1; min-width: 0; }
+  .spark-name { font-size: 13px; font-weight: 500; }
+  .spark-meta { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px; }
+  .spark-svg { flex-shrink: 0; }
+  .spark-val { font-family: var(--font-mono); font-size: 14px; text-align: right; flex-shrink: 0; width: 90px; }
+
+  /* EMPTY */
+  .empty-panel {
+    padding: 48px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .empty-panel .e-icon { font-size: 36px; margin-bottom: 10px; opacity: 0.4; }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .kpi-grid { grid-template-columns: 1fr 1fr; }
+
+
+  /* SPA Navigation */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .spa-nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: rgba(22,27,36,0.92);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 6px 8px;
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .nav-btn {
+    padding: 9px 20px;
+    border-radius: 30px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+  }
+
+  .nav-btn.active {
+    background: var(--border);
+    color: var(--text-primary);
+  }
+
+  .nav-btn:hover:not(.active) {
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* Add bottom padding so content doesn't hide behind nav */
+  .app, .stats-app { padding-bottom: 100px !important; }
+
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: APP PRINCIPAL -->
+<div class="page active" id="page-app">
+<div class="app">
+
+  <header>
+    <div class="logo">Finanțe<span>Personale</span></div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="statistici.html" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text-secondary);font-size:13px;font-family:var(--font-body);cursor:pointer;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent-blue)';this.style.color='var(--accent-blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">📊 Statistici</a>
+      <div class="date-display" id="dateDisplay"></div>
+    </div>
+  </header>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card income">
+      <div class="card-icon">↑</div>
+      <div class="card-label">Total Intrări</div>
+      <div class="card-amount" id="totalIncome">0,00 MDL</div>
+      <div class="card-sub" id="incomeCount">0 tranzacții</div>
+    </div>
+    <div class="summary-card expense">
+      <div class="card-icon">↓</div>
+      <div class="card-label">Total Cheltuieli</div>
+      <div class="card-amount" id="totalExpense">0,00 MDL</div>
+      <div class="card-sub" id="expenseCount">0 tranzacții</div>
+    </div>
+    <div class="summary-card balance">
+      <div class="card-icon">◎</div>
+      <div class="card-label">Sold Curent</div>
+      <div class="card-amount" id="totalBalance">0,00 MDL</div>
+      <div class="card-sub" id="balanceStatus">—</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- Transaction List -->
+    <div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Tranzacții</div>
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="setFilter('toate')">Toate</button>
+            <button class="filter-tab" onclick="setFilter('intrari')">Intrări</button>
+            <button class="filter-tab" onclick="setFilter('cheltuieli')">Cheltuieli</button>
+          </div>
+        </div>
+        <div class="transactions-list" id="transactionList"></div>
+      </div>
+
+      <!-- Category breakdown -->
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-header">
+          <div class="panel-title">Categorii Cheltuieli</div>
+        </div>
+        <div class="cat-breakdown" id="catBreakdown">
+          <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px 0;">Nicio cheltuială înregistrată</div>
+        </div>
+      </div>
+
+      <!-- Weekly Budget Panel -->
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-header">
+          <div class="panel-title">🎯 Buget Săptămânal</div>
+          <div class="week-nav">
+            <button class="week-nav-btn" onclick="changeWeek(-1)">◀</button>
+            <div class="week-label" id="weekLabel">—</div>
+            <button class="week-nav-btn" onclick="changeWeek(1)">▶</button>
+          </div>
+        </div>
+        <div class="budget-body">
+          <div id="budgetStatusBanner" class="budget-status-banner ok" style="display:none"></div>
+          <div id="budgetRows"></div>
+          <!-- Add new budget limit -->
+          <div class="budget-add-row">
+            <select class="form-select" id="budgetCat">
+              <option value="" disabled selected>Categorie</option>
+            </select>
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;font-family:var(--font-mono)">MDL</span>
+              <input type="number" class="form-input" id="budgetAmt" placeholder="Limită" min="1" step="1" style="padding-left:44px;">
+            </div>
+            <button class="budget-add-btn" onclick="addBudget()">+ Limită</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Transaction Form -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Adaugă Tranzacție</div>
+      </div>
+      <div class="form-panel">
+        <div class="type-selector">
+          <button class="type-btn income-btn selected" id="incomeBtn" onclick="selectType('intrare')">
+            ↑ Intrare
+          </button>
+          <button class="type-btn expense-btn" id="expenseBtn" onclick="selectType('cheltuiala')">
+            ↓ Cheltuială
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Descriere</label>
+          <input type="text" class="form-input" id="desc" placeholder="ex: Salariu, Chiurie, Cumpărături…">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Sumă</label>
+          <div class="amount-wrapper">
+            <span class="currency-prefix">MDL</span>
+            <input type="number" class="form-input" id="amount" placeholder="0,00" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Categorie</label>
+          <select class="form-select" id="category">
+            <option value="" disabled selected>Selectează categoria</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" class="form-input" id="txDate">
+        </div>
+
+        <button class="submit-btn" onclick="addTransaction()">
+          + Adaugă Tranzacție
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DATORII SECTION (full width below) -->
+<div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 48px;">
+
+  <div class="debts-section">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:700;">💸 Datorii</div>
+      <div class="debts-filter-tabs">
+        <button class="filter-tab active" onclick="setDebtFilter('toate')">Toate</button>
+        <button class="filter-tab" onclick="setDebtFilter('datorez')">Eu datorez</button>
+        <button class="filter-tab" onclick="setDebtFilter('mi-se-datoreaza')">Mi se datorează</button>
+        <button class="filter-tab" onclick="setDebtFilter('platite')">Achitate</button>
+      </div>
+    </div>
+
+    <!-- Debt summary -->
+    <div class="debts-summary-bar">
+      <div class="debt-summary-card">
+        <div class="dsc-icon red">😬</div>
+        <div>
+          <div class="dsc-label">EU DATOREZ</div>
+          <div class="dsc-val red" id="totalOwed">0,00 MDL</div>
+        </div>
+      </div>
+      <div class="debt-summary-card">
+        <div class="dsc-icon green">🤝</div>
+        <div>
+          <div class="dsc-label">MI SE DATOREAZĂ</div>
+          <div class="dsc-val green" id="totalOwing">0,00 MDL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debt cards grid -->
+    <div class="debts-grid" id="debtGrid">
+      <div style="grid-column:1/-1;color:var(--text-muted);font-size:14px;text-align:center;padding:40px 0;">
+        Nicio datorie înregistrată. Adaugă mai jos!
+      </div>
+    </div>
+
+    <!-- Add debt form -->
+    <div class="debts-add-form">
+      <div class="debts-add-title">+ Adaugă Datorie Nouă</div>
+      <div class="debt-type-toggle">
+        <button class="debt-type-btn owe-btn active" id="debtOweBtn" onclick="selectDebtType('datorez')">😬 Eu datorez</button>
+        <button class="debt-type-btn owed-btn" id="debtOwedBtn" onclick="selectDebtType('mi-se-datoreaza')">🤝 Mi se datorează</button>
+      </div>
+      <div class="debt-form-grid">
+        <input type="text" class="form-input" id="debtPerson" placeholder="Persoana (ex: Ion, Mama…)">
+        <div style="position:relative">
+          <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:12px;font-family:var(--font-mono)">MDL</span>
+          <input type="number" class="form-input" id="debtAmount" placeholder="Sumă" min="1" step="0.01" style="padding-left:44px;">
+        </div>
+        <input type="text" class="form-input" id="debtDesc" placeholder="Motiv (ex: împrumut, cumpărături…)">
+        <input type="date" class="form-input" id="debtDue" title="Scadență (opțional)">
+      </div>
+      <button class="debt-submit-btn" onclick="addDebt()">+ Adaugă Datorie</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- INVESTIȚII + FOND ZILE NEGRE -->
+<div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 20px 56px;">
+  <div class="two-col-section">
+
+    <!-- ── INVESTIȚII ── -->
+    <div>
+      <div class="section-title">📈 Investiții</div>
+      <div class="panel">
+        <div class="inv-summary-row">
+          <div class="inv-stat">
+            <div class="inv-stat-label">Investit</div>
+            <div class="inv-stat-val blue" id="invTotalInvested">0,00 MDL</div>
+          </div>
+          <div class="inv-stat">
+            <div class="inv-stat-label">Valoare curentă</div>
+            <div class="inv-stat-val" id="invTotalCurrent">0,00 MDL</div>
+          </div>
+          <div class="inv-stat">
+            <div class="inv-stat-label">Profit / Pierdere</div>
+            <div class="inv-stat-val" id="invTotalProfit">0,00 MDL</div>
+          </div>
+        </div>
+
+        <div class="inv-list" id="invList">
+          <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:30px 0;">Nicio investiție adăugată.</div>
+        </div>
+
+        <div class="inv-add-form">
+          <div class="inv-type-chips" id="invTypeChips">
+            <button class="inv-chip active" onclick="selectInvType('📊 Acțiuni')">📊 Acțiuni</button>
+            <button class="inv-chip" onclick="selectInvType('₿ Crypto')">₿ Crypto</button>
+            <button class="inv-chip" onclick="selectInvType('🏠 Imobiliare')">🏠 Imobiliare</button>
+            <button class="inv-chip" onclick="selectInvType('🏦 Depozit')">🏦 Depozit</button>
+            <button class="inv-chip" onclick="selectInvType('🪙 Altele')">🪙 Altele</button>
+          </div>
+          <div class="inv-form-grid">
+            <input type="text" class="form-input" id="invName" placeholder="Nume (ex: Bitcoin, BVB…)">
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
+              <input type="number" class="form-input" id="invInvested" placeholder="Investit" min="0" step="0.01" style="padding-left:40px;">
+            </div>
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
+              <input type="number" class="form-input" id="invCurrent" placeholder="Val. curentă" min="0" step="0.01" style="padding-left:40px;">
+            </div>
+          </div>
+          <button class="inv-submit-btn" onclick="addInvestment()">+ Adaugă Investiție</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FOND ZILE NEGRE ── -->
+    <div>
+      <div class="section-title">🛡️ Fond Zile Negre</div>
+      <div class="panel">
+        <div class="savings-goal-ring">
+          <div class="ring-wrap">
+            <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
+              <circle class="ring-bg" cx="80" cy="80" r="70"/>
+              <circle class="ring-fill" id="savingsRing" cx="80" cy="80" r="70"/>
+            </svg>
+            <div class="ring-center">
+              <div class="ring-pct" id="savingsPct">0%</div>
+              <div class="ring-label">din obiectiv</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="savings-stats">
+          <div class="sstat">
+            <div class="sstat-label">Economisit</div>
+            <div class="sstat-val" id="savingsTotal" style="color:var(--accent-gold)">0,00 MDL</div>
+          </div>
+          <div class="sstat">
+            <div class="sstat-label">Obiectiv</div>
+            <div class="sstat-val" id="savingsGoalDisplay" style="color:var(--text-secondary)">—</div>
+          </div>
+        </div>
+
+        <div class="savings-config">
+          <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;">Procent din intrări alocat automat</div>
+          <div class="pct-btn-group" id="pctBtnGroup">
+            <button class="pct-btn" onclick="setPct(5)">5%</button>
+            <button class="pct-btn" onclick="setPct(10)">10%</button>
+            <button class="pct-btn" onclick="setPct(15)">15%</button>
+            <button class="pct-btn" onclick="setPct(20)">20%</button>
+            <button class="pct-btn" onclick="setPct(25)">25%</button>
+          </div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;" id="pctHint">Alege un procent ca aplicația să calculeze cât ar trebui să economisești din fiecare intrare.</div>
+
+          <div class="savings-config-row" style="margin-top:8px;">
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
+              <input type="number" class="form-input" id="savingsAdd" placeholder="Sumă de adăugat" min="0" step="0.01" style="padding-left:40px;font-size:13px;padding-top:10px;padding-bottom:10px;">
+            </div>
+            <div style="position:relative">
+              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
+              <input type="number" class="form-input" id="savingsGoalInput" placeholder="Obiectiv total" min="0" step="1" style="padding-left:40px;font-size:13px;padding-top:10px;padding-bottom:10px;">
+            </div>
+          </div>
+          <button class="savings-submit-btn" onclick="addSavings()">+ Adaugă la Fond</button>
+        </div>
+
+        <div style="padding:0 20px;border-top:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;padding:12px 0 8px;">Istoric depuneri</div>
+        </div>
+        <div class="savings-history" id="savingsHistory">
+          <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px 0;">Nicio depunere încă.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- PAGE 2: STATISTICI -->
+<div class="page" id="page-stats">
+<div class="app">
+
+  <header>
+    <div class="logo">Finanțe<span>Personale</span> · <span style="font-size:18px">Statistici</span></div>
+    <a class="back-btn" href="#">← Înapoi la aplicație</a>
+  </header>
+
+  <div class="period-bar">
+    <div class="page-title">📊 Raport Financiar</div>
+    <div class="period-tabs">
+      <button class="period-tab" onclick="setPeriod(1)">Luna aceasta</button>
+      <button class="period-tab" onclick="setPeriod(3)">3 luni</button>
+      <button class="period-tab active" onclick="setPeriod(6)">6 luni</button>
+      <button class="period-tab" onclick="setPeriod(12)">1 an</button>
+      <button class="period-tab" onclick="setPeriod(0)">Tot</button>
+    </div>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- Row 1: Bar chart luna + Donut cheltuieli -->
+  <div class="row-2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Intrări vs Cheltuieli</div>
+        <div class="panel-sub" id="barChartSub">pe luni</div>
+      </div>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Cheltuieli pe Categorii</div>
+        <div class="panel-sub" id="donutSub"></div>
+      </div>
+      <div class="donut-wrap" id="donutWrap"></div>
+    </div>
+  </div>
+
+  <!-- Row 2: Trend linie + Saving rate -->
+  <div class="row-2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Evoluția Soldului</div>
+        <div class="panel-sub">cumulat în timp</div>
+      </div>
+      <div class="line-chart-wrap" id="lineChartWrap"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Rata de Economisire</div>
+        <div class="panel-sub">% din intrări rămase</div>
+      </div>
+      <div id="savingRatePanel"></div>
+    </div>
+  </div>
+
+  <!-- Row 3: Top categorii sparklines + Heatmap cheltuieli -->
+  <div class="row-2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Top Categorii Cheltuieli</div>
+        <div class="panel-sub">trend lunar</div>
+      </div>
+      <div id="sparkPanel"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Heatmap Cheltuieli</div>
+        <div class="panel-sub">intensitate pe zile</div>
+      </div>
+      <div class="heatmap-wrap" id="heatmapWrap"></div>
+    </div>
+  </div>
+
+  <!-- Row full: Monthly table -->
+  <div class="row-full">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Rezumat Lunar Detaliat</div>
+        <div class="panel-sub">intrări, cheltuieli, economii, sold</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="trend-table" id="monthTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row: Investitii + Datorii stats -->
+  <div class="row-2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">📈 Portofoliu Investiții</div>
+      </div>
+      <div id="invStatsPanel"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">💸 Situație Datorii</div>
+      </div>
+      <div id="debtStatsPanel"></div>
+    </div>
+  </div>
+
+</div>
+
+
+</div>
+
+<!-- NAVIGATION BAR -->
+<nav class="spa-nav">
+  <button class="nav-btn active" id="nav-app" onclick="showPage('app')">🏠 Aplicație</button>
+  <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">📊 Statistici</button>
+</nav>
+
+<script>
+// ── SPA Router ──────────────────────────────────────────────
+function showPage(page) {
+  document.getElementById('page-app').classList.toggle('active', page === 'app');
+  document.getElementById('page-stats').classList.toggle('active', page === 'stats');
+  document.getElementById('nav-app').classList.toggle('active', page === 'app');
+  document.getElementById('nav-stats').classList.toggle('active', page === 'stats');
+  if (page === 'stats') {
+    // Refresh data references from localStorage before rendering stats
+    transactions.length = 0;
+    JSON.parse(localStorage.getItem('fp_transactions') || '[]').forEach(t => transactions.push(t));
+    investments.length = 0;
+    JSON.parse(localStorage.getItem('fp_investments') || '[]').forEach(i => investments.push(i));
+    debts.length = 0;
+    JSON.parse(localStorage.getItem('fp_debts') || '[]').forEach(d => debts.push(d));
+    const sd = JSON.parse(localStorage.getItem('fp_savings') || '{"goal":0,"pct":10,"history":[]}');
+    savingsData.goal = sd.goal; savingsData.pct = sd.pct; savingsData.history = sd.history;
+    renderAll();
+  }
+}
+
+// Fix back button in stats page
+document.querySelectorAll('.back-btn').forEach(b => {
+  b.addEventListener('click', (e) => { e.preventDefault(); showPage('app'); });
+});
+
+const CATEGORIES = {
+  intrare: [
+    { label: '💼 Salariu', color: '#00e5a0' },
+    { label: '📈 Investiții', color: '#4d9fff' },
+    { label: '🎁 Cadou', color: '#f0b429' },
+    { label: '🏠 Chirie primită', color: '#a78bfa' },
+    { label: '💰 Altele', color: '#7a8599' },
+  ],
+  cheltuiala: [
+    { label: '🛒 Alimente', color: '#ff6b6b' },
+    { label: '🏠 Locuință', color: '#f0b429' },
+    { label: '🚗 Transport', color: '#4d9fff' },
+    { label: '💊 Sănătate', color: '#f97316' },
+    { label: '🎭 Divertisment', color: '#a78bfa' },
+    { label: '👗 Îmbrăcăminte', color: '#ec4899' },
+    { label: '📚 Educație', color: '#00e5a0' },
+    { label: '📱 Utilități', color: '#06b6d4' },
+    { label: '🍽️ Restaurant', color: '#fb923c' },
+    { label: '💳 Altele', color: '#7a8599' },
+  ]
+};
+
+let transactions = JSON.parse(localStorage.getItem('fp_transactions') || '[]');
+let currentType = 'intrare';
+let currentFilter = 'toate';
+
+function save() {
+  localStorage.setItem('fp_transactions', JSON.stringify(transactions));
+}
+
+function selectType(type) {
+  currentType = type;
+  document.getElementById('incomeBtn').classList.toggle('selected', type === 'intrare');
+  document.getElementById('expenseBtn').classList.toggle('selected', type === 'cheltuiala');
+  updateCategoryOptions();
+  document.getElementById('category').value = '';
+}
+
+function updateCategoryOptions() {
+  const sel = document.getElementById('category');
+  sel.innerHTML = '<option value="" disabled selected>Selectează categoria</option>';
+  CATEGORIES[currentType].forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.label;
+    o.textContent = c.label;
+    sel.appendChild(o);
+  });
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['toate','intrari','cheltuieli'][i] === f);
+  });
+  renderTransactions();
+}
+
+function fmt(n) {
+  return Number(n).toLocaleString('ro-MD', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' MDL';
+}
+
+function fmtShort(n) {
+  if (n >= 1000) return (n/1000).toFixed(1) + 'k';
+  return n.toFixed(0);
+}
+
+function addTransaction() {
+  const desc = document.getElementById('desc').value.trim();
+  const amount = parseFloat(document.getElementById('amount').value);
+  const category = document.getElementById('category').value;
+  const date = document.getElementById('txDate').value;
+
+  if (!desc || isNaN(amount) || amount <= 0 || !category || !date) {
+    shakeForm(); return;
+  }
+
+  transactions.unshift({
+    id: Date.now(),
+    type: currentType,
+    desc, amount, category, date
+  });
+
+  save();
+  render();
+
+  document.getElementById('desc').value = '';
+  document.getElementById('amount').value = '';
+  document.getElementById('category').value = '';
+}
+
+function shakeForm() {
+  const btn = document.querySelector('.submit-btn');
+  btn.style.background = 'rgba(255,77,109,0.4)';
+  btn.textContent = 'Completează toate câmpurile!';
+  setTimeout(() => {
+    btn.style.background = '';
+    btn.textContent = '+ Adaugă Tranzacție';
+  }, 1800);
+}
+
+function deleteTransaction(id) {
+  transactions = transactions.filter(t => t.id !== id);
+  save();
+  render();
+}
+
+function renderTransactions() {
+  const list = document.getElementById('transactionList');
+  let filtered = transactions;
+  if (currentFilter === 'intrari') filtered = transactions.filter(t => t.type === 'intrare');
+  if (currentFilter === 'cheltuieli') filtered = transactions.filter(t => t.type === 'cheltuiala');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><p>Nicio tranzacție de afișat.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(t => {
+    const isIncome = t.type === 'intrare';
+    const d = new Date(t.date);
+    const dateStr = d.toLocaleDateString('ro-MD', { day: '2-digit', month: 'short', year: 'numeric' });
+    const catColor = getCatColor(t.category, t.type);
+    return `
+      <div class="transaction-item">
+        <div class="tx-icon ${isIncome ? 'income-icon' : 'expense-icon'}">
+          ${t.category.split(' ')[0]}
+        </div>
+        <div class="tx-info">
+          <div class="tx-desc">${t.desc}</div>
+          <div class="tx-meta">${dateStr} · <span style="color:${catColor}">${t.category.split(' ').slice(1).join(' ')}</span></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount ${isIncome ? 'pos' : 'neg'}">${isIncome ? '+' : '−'}${fmt(t.amount)}</div>
+        </div>
+        <button class="tx-delete" onclick="deleteTransaction(${t.id})">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function getCatColor(cat, type) {
+  const cats = CATEGORIES[type] || [];
+  const found = cats.find(c => c.label === cat);
+  return found ? found.color : '#7a8599';
+}
+
+function renderSummary() {
+  const income = transactions.filter(t => t.type === 'intrare').reduce((s, t) => s + t.amount, 0);
+  const expense = transactions.filter(t => t.type === 'cheltuiala').reduce((s, t) => s + t.amount, 0);
+  const balance = income - expense;
+  const incCount = transactions.filter(t => t.type === 'intrare').length;
+  const expCount = transactions.filter(t => t.type === 'cheltuiala').length;
+
+  document.getElementById('totalIncome').textContent = fmt(income);
+  document.getElementById('totalExpense').textContent = fmt(expense);
+  document.getElementById('totalBalance').textContent = fmt(balance);
+  document.getElementById('incomeCount').textContent = `${incCount} tranzacții`;
+  document.getElementById('expenseCount').textContent = `${expCount} tranzacții`;
+  document.getElementById('balanceStatus').textContent = balance >= 0 ? '▲ pozitiv' : '▼ negativ';
+  document.getElementById('totalBalance').style.color = balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+}
+
+function renderCategoryBreakdown() {
+  const expTx = transactions.filter(t => t.type === 'cheltuiala');
+  if (expTx.length === 0) {
+    document.getElementById('catBreakdown').innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px 0;">Nicio cheltuială înregistrată</div>`;
+    return;
+  }
+
+  const totals = {};
+  expTx.forEach(t => {
+    totals[t.category] = (totals[t.category] || 0) + t.amount;
+  });
+  const totalExp = Object.values(totals).reduce((s, v) => s + v, 0);
+  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+
+  document.getElementById('catBreakdown').innerHTML = sorted.map(([cat, amt]) => {
+    const pct = ((amt / totalExp) * 100).toFixed(1);
+    const color = getCatColor(cat, 'cheltuiala');
+    return `
+      <div class="cat-row">
+        <div class="cat-info">
+          <div class="cat-dot" style="background:${color}"></div>
+          <div class="cat-name">${cat.split(' ').slice(1).join(' ')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="cat-pct">${pct}%</div>
+          <div class="cat-total" style="color:${color}">${fmt(amt)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function render() {
+  renderSummary();
+  renderTransactions();
+  renderCategoryBreakdown();
+  renderWeeklyBudget();
+  renderDebts();
+  renderInvestments();
+  renderSavings();
+}
+
+// ── WEEKLY BUDGET ──────────────────────────────────────────
+let budgets = JSON.parse(localStorage.getItem('fp_budgets') || '[]');
+// weekOffset: 0 = current week, -1 = last week, etc.
+let weekOffset = 0;
+
+function saveBudgets() {
+  localStorage.setItem('fp_budgets', JSON.stringify(budgets));
+}
+
+function getWeekRange(offset) {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diffToMon = (day === 0 ? -6 : 1 - day);
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diffToMon + offset * 7);
+  mon.setHours(0,0,0,0);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  sun.setHours(23,59,59,999);
+  return { start: mon, end: sun };
+}
+
+function fmtWeekLabel(start, end) {
+  const opts = { day: '2-digit', month: 'short' };
+  const s = start.toLocaleDateString('ro-MD', opts);
+  const e = end.toLocaleDateString('ro-MD', opts);
+  if (weekOffset === 0) return `Săptămâna aceasta · ${s}–${e}`;
+  if (weekOffset === -1) return `Săptămâna trecută · ${s}–${e}`;
+  return `${s} – ${e}`;
+}
+
+function getWeeklySpent(category, start, end) {
+  return transactions
+    .filter(t => t.type === 'cheltuiala' && t.category === category)
+    .filter(t => {
+      const d = new Date(t.date + 'T12:00:00');
+      return d >= start && d <= end;
+    })
+    .reduce((s, t) => s + t.amount, 0);
+}
+
+function changeWeek(dir) {
+  weekOffset += dir;
+  if (weekOffset > 0) weekOffset = 0;
+  renderWeeklyBudget();
+}
+
+function addBudget() {
+  const cat = document.getElementById('budgetCat').value;
+  const amt = parseFloat(document.getElementById('budgetAmt').value);
+  if (!cat || isNaN(amt) || amt <= 0) {
+    const btn = document.querySelector('.budget-add-btn');
+    btn.textContent = 'Completează!';
+    btn.style.background = 'rgba(255,77,109,0.3)';
+    setTimeout(() => { btn.textContent = '+ Limită'; btn.style.background = ''; }, 1500);
+    return;
+  }
+  const existing = budgets.findIndex(b => b.category === cat);
+  if (existing >= 0) budgets[existing].limit = amt;
+  else budgets.push({ category: cat, limit: amt });
+  saveBudgets();
+  document.getElementById('budgetCat').value = '';
+  document.getElementById('budgetAmt').value = '';
+  renderWeeklyBudget();
+}
+
+function deleteBudget(cat) {
+  budgets = budgets.filter(b => b.category !== cat);
+  saveBudgets();
+  renderWeeklyBudget();
+}
+
+function populateBudgetCatSelect() {
+  const sel = document.getElementById('budgetCat');
+  const existing = budgets.map(b => b.category);
+  sel.innerHTML = '<option value="" disabled selected>Categorie</option>';
+  CATEGORIES.cheltuiala.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.label;
+    o.textContent = c.label;
+    if (existing.includes(c.label)) o.textContent += ' ✓';
+    sel.appendChild(o);
+  });
+}
+
+function renderWeeklyBudget() {
+  const { start, end } = getWeekRange(weekOffset);
+  document.getElementById('weekLabel').textContent = fmtWeekLabel(start, end);
+  populateBudgetCatSelect();
+
+  const container = document.getElementById('budgetRows');
+  const banner = document.getElementById('budgetStatusBanner');
+
+  if (budgets.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:20px 0 10px">Nicio limită setată. Adaugă mai jos!</div>`;
+    banner.style.display = 'none';
+    return;
+  }
+
+  let anyOver = false, anyWarn = false;
+  const rows = budgets.map(b => {
+    const spent = getWeeklySpent(b.category, start, end);
+    const pct = Math.min((spent / b.limit) * 100, 100);
+    const rawPct = (spent / b.limit) * 100;
+    const color = getCatColor(b.category, 'cheltuiala');
+    let barColor = color;
+    let statusIcon = '';
+    let overAmt = '';
+
+    if (rawPct >= 100) {
+      barColor = 'var(--accent-red)';
+      statusIcon = '🔴';
+      anyOver = true;
+      const diff = spent - b.limit;
+      overAmt = `<span class="over-amt">+${fmt(diff)}</span>`;
+    } else if (rawPct >= 80) {
+      barColor = 'var(--accent-gold)';
+      statusIcon = '🟡';
+      anyWarn = true;
+    } else {
+      statusIcon = '🟢';
+    }
+
+    return `
+      <div class="budget-row">
+        <div class="budget-row-header">
+          <div class="budget-cat-name">
+            ${statusIcon} ${b.category.split(' ').slice(1).join(' ')}
+            <button class="budget-delete" onclick="deleteBudget('${b.category.replace(/'/g,"\\'")}')">✕</button>
+          </div>
+          <div class="budget-amounts">
+            <span class="spent">${fmt(spent)}</span> / ${fmt(b.limit)} ${overAmt}
+          </div>
+        </div>
+        <div class="budget-track">
+          <div class="budget-fill" style="width:${pct}%;background:${barColor}"></div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = rows;
+
+  // Banner
+  banner.style.display = 'flex';
+  if (anyOver) {
+    banner.className = 'budget-status-banner over';
+    banner.innerHTML = `<span class="banner-icon">⚠️</span><span>Ai depășit bugetul la una sau mai multe categorii săptămâna aceasta!</span>`;
+  } else if (anyWarn) {
+    banner.className = 'budget-status-banner warn';
+    banner.innerHTML = `<span class="banner-icon">⚡</span><span>Ești aproape de limită la unele categorii — mai ai grijă!</span>`;
+  } else {
+    banner.className = 'budget-status-banner ok';
+    banner.innerHTML = `<span class="banner-icon">✅</span><span>Bravo! Ești în limitele bugetului săptămânal.</span>`;
+  }
+}
+// ── END WEEKLY BUDGET ────────────────────────────────────────
+
+// ── DATORII ────────────────────────────────────────────────
+let debts = JSON.parse(localStorage.getItem('fp_debts') || '[]');
+let currentDebtType = 'datorez';
+let currentDebtFilter = 'toate';
+
+function saveDebts() {
+  localStorage.setItem('fp_debts', JSON.stringify(debts));
+}
+
+function selectDebtType(type) {
+  currentDebtType = type;
+  document.getElementById('debtOweBtn').classList.toggle('active', type === 'datorez');
+  document.getElementById('debtOwedBtn').classList.toggle('active', type === 'mi-se-datoreaza');
+}
+
+function setDebtFilter(f) {
+  currentDebtFilter = f;
+  document.querySelectorAll('.debts-filter-tabs .filter-tab').forEach((t, i) => {
+    t.classList.toggle('active', ['toate','datorez','mi-se-datoreaza','platite'][i] === f);
+  });
+  renderDebts();
+}
+
+function addDebt() {
+  const person = document.getElementById('debtPerson').value.trim();
+  const amount = parseFloat(document.getElementById('debtAmount').value);
+  const desc = document.getElementById('debtDesc').value.trim();
+  const due = document.getElementById('debtDue').value;
+
+  if (!person || isNaN(amount) || amount <= 0) {
+    const btn = document.querySelector('.debt-submit-btn');
+    btn.textContent = 'Completează persoana și suma!';
+    btn.style.background = 'rgba(255,77,109,0.4)';
+    setTimeout(() => { btn.textContent = '+ Adaugă Datorie'; btn.style.background = ''; }, 1800);
+    return;
+  }
+
+  debts.unshift({
+    id: Date.now(),
+    type: currentDebtType,
+    person, amount, desc,
+    due: due || null,
+    paid: false,
+    createdAt: new Date().toISOString().split('T')[0]
+  });
+
+  saveDebts();
+  renderDebts();
+
+  document.getElementById('debtPerson').value = '';
+  document.getElementById('debtAmount').value = '';
+  document.getElementById('debtDesc').value = '';
+  document.getElementById('debtDue').value = '';
+}
+
+function markDebtPaid(id) {
+  const d = debts.find(d => d.id === id);
+  if (d) { d.paid = !d.paid; saveDebts(); renderDebts(); }
+}
+
+function deleteDebt(id) {
+  debts = debts.filter(d => d.id !== id);
+  saveDebts();
+  renderDebts();
+}
+
+function renderDebts() {
+  // Summary
+  const totalOwed = debts.filter(d => d.type === 'datorez' && !d.paid).reduce((s, d) => s + d.amount, 0);
+  const totalOwing = debts.filter(d => d.type === 'mi-se-datoreaza' && !d.paid).reduce((s, d) => s + d.amount, 0);
+  document.getElementById('totalOwed').textContent = fmt(totalOwed);
+  document.getElementById('totalOwing').textContent = fmt(totalOwing);
+
+  // Filter
+  let filtered = debts;
+  if (currentDebtFilter === 'datorez') filtered = debts.filter(d => d.type === 'datorez' && !d.paid);
+  if (currentDebtFilter === 'mi-se-datoreaza') filtered = debts.filter(d => d.type === 'mi-se-datoreaza' && !d.paid);
+  if (currentDebtFilter === 'platite') filtered = debts.filter(d => d.paid);
+
+  const grid = document.getElementById('debtGrid');
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;color:var(--text-muted);font-size:14px;text-align:center;padding:40px 0;">Nicio datorie de afișat.</div>`;
+    return;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  grid.innerHTML = filtered.map(d => {
+    const isOwe = d.type === 'datorez';
+    let dueBadge = '';
+    let overdueClass = '';
+
+    if (d.due && !d.paid) {
+      const dueDate = new Date(d.due + 'T12:00:00');
+      const diffDays = Math.ceil((dueDate - today) / (1000*60*60*24));
+      if (diffDays < 0) {
+        overdueClass = 'overdue';
+        dueBadge = `<span class="debt-due overdue">🔴 Depășit cu ${Math.abs(diffDays)} zile</span>`;
+      } else if (diffDays <= 3) {
+        dueBadge = `<span class="debt-due soon">⚡ Scade în ${diffDays} zi${diffDays === 1 ? '' : 'le'}</span>`;
+      } else {
+        const dd = new Date(d.due + 'T12:00:00').toLocaleDateString('ro-MD', { day:'2-digit', month:'short' });
+        dueBadge = `<span class="debt-due">📅 Scadent: ${dd}</span>`;
+      }
+    } else if (!d.due) {
+      dueBadge = `<span class="debt-due" style="color:var(--text-muted)">Fără scadență</span>`;
+    }
+
+    const createdStr = new Date(d.createdAt).toLocaleDateString('ro-MD', { day:'2-digit', month:'short', year:'numeric' });
+
+    return `
+      <div class="debt-card ${overdueClass} ${d.paid ? 'paid' : ''}">
+        ${d.paid ? '<div class="debt-paid-stamp">ACHITAT</div>' : ''}
+        <div class="debt-card-top">
+          <span class="debt-type-badge ${isOwe ? 'owe' : 'owed'}">${isOwe ? '↑ Eu datorez' : '↓ Mi se datorează'}</span>
+          <div class="debt-card-actions">
+            <button class="debt-action-btn" onclick="markDebtPaid(${d.id})" title="${d.paid ? 'Marchează neachitat' : 'Marchează achitat'}">${d.paid ? '↩' : '✓'}</button>
+            <button class="debt-action-btn del" onclick="deleteDebt(${d.id})">✕</button>
+          </div>
+        </div>
+        <div class="debt-person">${d.person}</div>
+        ${d.desc ? `<div class="debt-desc">${d.desc}</div>` : '<div style="height:6px"></div>'}
+        <div class="debt-amount ${isOwe ? 'owe' : 'owed'}">${isOwe ? '−' : '+'}${fmt(d.amount)}</div>
+        <div class="debt-meta">
+          ${dueBadge}
+          <span style="color:var(--text-muted)">adăugat ${createdStr}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+// ── END DATORII ─────────────────────────────────────────────
+
+// ── INVESTIȚII ─────────────────────────────────────────────
+let investments = JSON.parse(localStorage.getItem('fp_investments') || '[]');
+let currentInvType = '📊 Acțiuni';
+
+function saveInvestments() { localStorage.setItem('fp_investments', JSON.stringify(investments)); }
+
+function selectInvType(type) {
+  currentInvType = type;
+  document.querySelectorAll('.inv-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.trim() === type);
+  });
+}
+
+function addInvestment() {
+  const name = document.getElementById('invName').value.trim();
+  const invested = parseFloat(document.getElementById('invInvested').value);
+  const current = parseFloat(document.getElementById('invCurrent').value);
+
+  if (!name || isNaN(invested) || invested <= 0) {
+    const btn = document.querySelector('.inv-submit-btn');
+    btn.textContent = 'Completează numele și suma!';
+    btn.style.background = 'rgba(255,77,109,0.4)';
+    setTimeout(() => { btn.textContent = '+ Adaugă Investiție'; btn.style.background = ''; }, 1800);
+    return;
+  }
+
+  investments.unshift({
+    id: Date.now(),
+    type: currentInvType,
+    name,
+    invested,
+    current: isNaN(current) ? invested : current,
+    date: new Date().toISOString().split('T')[0]
+  });
+
+  saveInvestments();
+  renderInvestments();
+  document.getElementById('invName').value = '';
+  document.getElementById('invInvested').value = '';
+  document.getElementById('invCurrent').value = '';
+}
+
+function updateInvCurrent(id, val) {
+  const inv = investments.find(i => i.id === id);
+  if (inv) { inv.current = parseFloat(val) || inv.invested; saveInvestments(); renderInvestments(); }
+}
+
+function deleteInvestment(id) {
+  investments = investments.filter(i => i.id !== id);
+  saveInvestments();
+  renderInvestments();
+}
+
+function renderInvestments() {
+  const totalInvested = investments.reduce((s, i) => s + i.invested, 0);
+  const totalCurrent = investments.reduce((s, i) => s + i.current, 0);
+  const profit = totalCurrent - totalInvested;
+
+  document.getElementById('invTotalInvested').textContent = fmt(totalInvested);
+  document.getElementById('invTotalCurrent').textContent = fmt(totalCurrent);
+  const profEl = document.getElementById('invTotalProfit');
+  profEl.textContent = (profit >= 0 ? '+' : '') + fmt(profit);
+  profEl.className = 'inv-stat-val ' + (profit > 0 ? 'up' : profit < 0 ? 'down' : 'blue');
+
+  const list = document.getElementById('invList');
+  if (investments.length === 0) {
+    list.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:30px 0;">Nicio investiție adăugată.</div>`;
+    return;
+  }
+
+  list.innerHTML = investments.map(inv => {
+    const diff = inv.current - inv.invested;
+    const pct = inv.invested > 0 ? ((diff / inv.invested) * 100).toFixed(1) : '0.0';
+    const profitClass = diff > 0 ? 'pos' : diff < 0 ? 'neg' : '';
+    const profitSign = diff >= 0 ? '+' : '';
+    return `
+      <div class="inv-item">
+        <div class="inv-icon">${inv.type.split(' ')[0]}</div>
+        <div class="inv-info">
+          <div class="inv-name">${inv.name}</div>
+          <div class="inv-meta">${inv.type.split(' ').slice(1).join(' ')} · ${inv.date}</div>
+        </div>
+        <div class="inv-right">
+          <div class="inv-val">${fmt(inv.current)}</div>
+          <div class="inv-profit ${profitClass}">${profitSign}${fmt(diff)} (${profitSign}${pct}%)</div>
+        </div>
+        <button class="inv-delete" onclick="deleteInvestment(${inv.id})">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+// ── END INVESTIȚII ──────────────────────────────────────────
+
+// ── FOND ZILE NEGRE ─────────────────────────────────────────
+let savingsData = JSON.parse(localStorage.getItem('fp_savings') || '{"goal":0,"pct":10,"history":[]}');
+let selectedPct = savingsData.pct || 10;
+
+function saveSavings() { localStorage.setItem('fp_savings', JSON.stringify(savingsData)); }
+
+function setPct(p) {
+  selectedPct = p;
+  savingsData.pct = p;
+  saveSavings();
+  document.querySelectorAll('.pct-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === p);
+  });
+  const totalIncome = transactions.filter(t => t.type === 'intrare').reduce((s, t) => s + t.amount, 0);
+  const suggested = (totalIncome * p / 100).toFixed(2);
+  document.getElementById('pctHint').textContent = `${p}% din intrările tale totale = ${fmt(parseFloat(suggested))} de economisit`;
+  document.getElementById('savingsAdd').value = suggested;
+}
+
+function addSavings() {
+  const amt = parseFloat(document.getElementById('savingsAdd').value);
+  const goalVal = parseFloat(document.getElementById('savingsGoalInput').value);
+
+  if (!isNaN(goalVal) && goalVal > 0) savingsData.goal = goalVal;
+
+  if (isNaN(amt) || amt <= 0) {
+    const btn = document.querySelector('.savings-submit-btn');
+    btn.textContent = 'Introdu o sumă!';
+    btn.style.background = 'rgba(255,77,109,0.4)';
+    setTimeout(() => { btn.textContent = '+ Adaugă la Fond'; btn.style.background = ''; }, 1500);
+    return;
+  }
+
+  savingsData.history.unshift({
+    id: Date.now(),
+    amount: amt,
+    date: new Date().toISOString().split('T')[0],
+    pct: selectedPct
+  });
+
+  saveSavings();
+  renderSavings();
+  document.getElementById('savingsAdd').value = '';
+  document.getElementById('savingsGoalInput').value = '';
+}
+
+function deleteSavingsEntry(id) {
+  savingsData.history = savingsData.history.filter(h => h.id !== id);
+  saveSavings();
+  renderSavings();
+}
+
+function renderSavings() {
+  const total = savingsData.history.reduce((s, h) => s + h.amount, 0);
+  const goal = savingsData.goal || 0;
+  const pct = goal > 0 ? Math.min((total / goal) * 100, 100) : 0;
+  const circumference = 2 * Math.PI * 70; // r=70
+
+  document.getElementById('savingsPct').textContent = goal > 0 ? Math.round(pct) + '%' : '—';
+  document.getElementById('savingsTotal').textContent = fmt(total);
+  document.getElementById('savingsGoalDisplay').textContent = goal > 0 ? fmt(goal) : 'Nesetat';
+
+  const ring = document.getElementById('savingsRing');
+  const offset = circumference - (pct / 100) * circumference;
+  ring.style.strokeDasharray = circumference;
+  ring.style.strokeDashoffset = offset;
+  ring.style.stroke = pct >= 100 ? 'var(--accent-green)' : pct >= 60 ? 'var(--accent-gold)' : '#4d9fff';
+
+  // Sync pct buttons
+  document.querySelectorAll('.pct-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === (savingsData.pct || 10));
+  });
+
+  // History
+  const hist = document.getElementById('savingsHistory');
+  if (savingsData.history.length === 0) {
+    hist.innerHTML = `<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:16px 0;">Nicio depunere încă.</div>`;
+    return;
+  }
+  hist.innerHTML = savingsData.history.map(h => `
+    <div class="sh-item">
+      <span class="sh-desc">💰 Depunere${h.pct ? ` (${h.pct}%)` : ''}</span>
+      <span style="display:flex;align-items:center">
+        <span class="sh-amt">+${fmt(h.amount)}</span>
+        <span class="sh-date">${h.date}</span>
+        <button class="sh-delete" onclick="deleteSavingsEntry(${h.id})">✕</button>
+      </span>
+    </div>
+  `).join('');
+}
+// ── END FOND ─────────────────────────────────────────────────
+
+// Init
+function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('txDate').value = today;
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ro-MD', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  updateCategoryOptions();
+  render();
+  renderDebts();
+  renderInvestments();
+  renderSavings();
+  setPct(savingsData.pct || 10);
+}
+
+init();
+
+
+// ── Stats: shared data refs (already declared above) ─────────
+// transactions, investments, debts, savingsData reused from main JS
+
+let activePeriod = 6;
+
+const CAT_COLORS = {
+  '🛒 Alimente':'#ff6b6b','🏠 Locuință':'#f0b429','🚗 Transport':'#4d9fff',
+  '💊 Sănătate':'#f97316','🎭 Divertisment':'#a78bfa','👗 Îmbrăcăminte':'#ec4899',
+  '📚 Educație':'#00e5a0','📱 Utilități':'#06b6d4','🍽️ Restaurant':'#fb923c',
+  '💳 Altele':'#7a8599','💼 Salariu':'#00e5a0','📈 Investiții':'#4d9fff',
+  '🎁 Cadou':'#f0b429','🏠 Chirie primită':'#a78bfa','💰 Altele':'#7a8599'
+};
+
+function setPeriod(months) {
+  activePeriod = months;
+  document.querySelectorAll('.period-tab').forEach((t, i) => {
+    t.classList.toggle('active', [1,3,6,12,0][i] === months);
+  });
+  renderAll();
+}
+
+function getFilteredTx() {
+  if (activePeriod === 0) return transactions;
+  const cutoff = new Date();
+  cutoff.setMonth(cutoff.getMonth() - activePeriod);
+  cutoff.setDate(1);
+  cutoff.setHours(0,0,0,0);
+  return transactions.filter(t => new Date(t.date + 'T12:00:00') >= cutoff);
+}
+
+// Group transactions by YYYY-MM
+function groupByMonth(txList) {
+  const map = {};
+  txList.forEach(t => {
+    const key = t.date.slice(0, 7);
+    if (!map[key]) map[key] = { income: 0, expense: 0, txList: [] };
+    if (t.type === 'intrare') map[key].income += t.amount;
+    else map[key].expense += t.amount;
+    map[key].txList.push(t);
+  });
+  return map;
+}
+
+function monthName(ym) {
+  const [y, m] = ym.split('-');
+  return new Date(+y, +m - 1, 1).toLocaleDateString('ro-MD', { month: 'short', year: '2-digit' });
+}
+
+// ── KPI ──────────────────────────────────────────────────────
+function renderKPI() {
+  const tx = getFilteredTx();
+  const income = tx.filter(t => t.type === 'intrare').reduce((s,t) => s + t.amount, 0);
+  const expense = tx.filter(t => t.type === 'cheltuiala').reduce((s,t) => s + t.amount, 0);
+  const balance = income - expense;
+  const savingRate = income > 0 ? ((income - expense) / income * 100).toFixed(1) : '0.0';
+  const avgMonthly = (() => {
+    const months = groupByMonth(tx);
+    const keys = Object.keys(months);
+    return keys.length ? expense / keys.length : 0;
+  })();
+  const totalSaved = savingsData.history.reduce((s,h) => s + h.amount, 0);
+
+  const kpis = [
+    { label: 'Total Intrări', val: fmt(income), sub: tx.filter(t=>t.type==='intrare').length + ' tranzacții', color: 'var(--accent-green)' },
+    { label: 'Total Cheltuieli', val: fmt(expense), sub: tx.filter(t=>t.type==='cheltuiala').length + ' tranzacții', color: 'var(--accent-red)' },
+    { label: 'Sold Net', val: fmt(balance), sub: balance >= 0 ? '▲ pozitiv' : '▼ negativ', color: balance >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' },
+    { label: 'Rată Economisire', val: savingRate + '%', sub: 'din intrări', color: 'var(--accent-blue)' },
+    { label: 'Fond Zile Negre', val: fmt(totalSaved), sub: savingsData.goal > 0 ? Math.round(totalSaved/savingsData.goal*100) + '% din obiectiv' : 'obiectiv nesetat', color: 'var(--accent-gold)' },
+  ];
+
+  document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+    <div class="kpi-card">
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-val" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>
+  `).join('');
+}
+
+// ── BAR CHART ────────────────────────────────────────────────
+function renderBarChart() {
+  const tx = getFilteredTx();
+  const monthly = groupByMonth(tx);
+  const keys = Object.keys(monthly).sort();
+
+  const container = document.getElementById('barChart');
+  if (!keys.length) { container.innerHTML = '<div class="empty-panel"><div class="e-icon">📊</div>Date insuficiente.</div>'; return; }
+
+  const maxVal = Math.max(...keys.map(k => Math.max(monthly[k].income, monthly[k].expense)), 1);
+
+  container.innerHTML = keys.map(k => {
+    const inc = monthly[k].income;
+    const exp = monthly[k].expense;
+    const iw = (inc / maxVal * 100).toFixed(1);
+    const ew = (exp / maxVal * 100).toFixed(1);
+    return `
+      <div class="bar-month-group">
+        <div class="bar-month-label">${monthName(k)}</div>
+        <div class="bar-track-wrap">
+          <div class="bar-track"><div class="bar-fill" style="width:${iw}%;background:var(--accent-green)"></div></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${ew}%;background:var(--accent-red)"></div></div>
+        </div>
+        <div class="bar-month-val" style="font-size:10px">
+          <span style="color:var(--accent-green)">+${fmtShort(inc)}</span><br>
+          <span style="color:var(--accent-red)">-${fmtShort(exp)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── DONUT CHART ──────────────────────────────────────────────
+function renderDonut() {
+  const tx = getFilteredTx().filter(t => t.type === 'cheltuiala');
+  const wrap = document.getElementById('donutWrap');
+
+  if (!tx.length) {
+    wrap.innerHTML = '<div class="empty-panel"><div class="e-icon">🍩</div>Nicio cheltuială.</div>';
+    return;
+  }
+
+  const totals = {};
+  tx.forEach(t => { totals[t.category] = (totals[t.category] || 0) + t.amount; });
+  const total = Object.values(totals).reduce((s,v) => s+v, 0);
+  const sorted = Object.entries(totals).sort((a,b) => b[1]-a[1]).slice(0, 8);
+
+  const size = 160, cx = 80, cy = 80, r = 60, strokeW = 22;
+  const circ = 2 * Math.PI * r;
+  let offset = 0;
+  let segments = '';
+  sorted.forEach(([cat, val]) => {
+    const color = CAT_COLORS[cat] || '#7a8599';
+    const pct = val / total;
+    const dash = pct * circ;
+    const gap = circ - dash;
+    segments += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}" stroke-dashoffset="${(-offset * circ / (2*Math.PI*1)).toFixed(2)}" transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dashoffset 0.6s"/>`;
+    offset += pct * circ;
+  });
+
+  const legend = sorted.map(([cat, val]) => {
+    const color = CAT_COLORS[cat] || '#7a8599';
+    const pct = (val/total*100).toFixed(1);
+    const name = cat.split(' ').slice(1).join(' ');
+    return `
+      <div class="legend-item">
+        <div class="legend-left">
+          <div class="legend-dot" style="background:${color}"></div>
+          <span class="legend-name">${name}</span>
+        </div>
+        <div class="legend-right">
+          <span class="legend-pct">${pct}%</span>
+          <span class="legend-val" style="color:${color}">${fmtShort(val)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div class="donut-svg-wrap">
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="${strokeW}"/>
+        ${segments}
+      </svg>
+      <div class="donut-center">
+        <div class="donut-center-val" style="color:var(--accent-red)">${fmtShort(total)}</div>
+        <div class="donut-center-label">total</div>
+      </div>
+    </div>
+    <div class="donut-legend">${legend}</div>
+  `;
+  document.getElementById('donutSub').textContent = fmt(total);
+}
+
+// ── LINE CHART (sold cumulat) ─────────────────────────────────
+function renderLineChart() {
+  const tx = [...transactions].sort((a,b) => a.date.localeCompare(b.date));
+  const filtered = getFilteredTx();
+  const fKeys = new Set(filtered.map(t => t.date));
+  const fTx = tx.filter(t => fKeys.has(t.date) || true).filter(t => {
+    if (activePeriod === 0) return true;
+    const cutoff = new Date();
+    cutoff.setMonth(cutoff.getMonth() - activePeriod);
+    return new Date(t.date + 'T12:00:00') >= cutoff;
+  });
+
+  const wrap = document.getElementById('lineChartWrap');
+  if (!fTx.length) { wrap.innerHTML = '<div class="empty-panel"><div class="e-icon">📈</div>Date insuficiente.</div>'; return; }
+
+  // Build daily balances
+  const dayMap = {};
+  fTx.forEach(t => {
+    dayMap[t.date] = (dayMap[t.date] || 0) + (t.type === 'intrare' ? t.amount : -t.amount);
+  });
+  const days = Object.keys(dayMap).sort();
+  let running = 0;
+  const points = days.map(d => { running += dayMap[d]; return { d, v: running }; });
+
+  const W = 560, H = 140, padX = 40, padY = 16;
+  const minV = Math.min(...points.map(p => p.v));
+  const maxV = Math.max(...points.map(p => p.v));
+  const range = maxV - minV || 1;
+
+  const toX = (i) => padX + (i / (points.length - 1 || 1)) * (W - padX * 2);
+  const toY = (v) => padY + (1 - (v - minV) / range) * (H - padY * 2);
+
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${toX(i).toFixed(1)},${toY(p.v).toFixed(1)}`).join(' ');
+  const areaD = pathD + ` L${toX(points.length-1).toFixed(1)},${H} L${toX(0).toFixed(1)},${H} Z`;
+
+  // X axis labels (max 6)
+  const step = Math.max(1, Math.floor(points.length / 6));
+  const labels = points.filter((_, i) => i % step === 0 || i === points.length - 1);
+
+  const lastVal = points[points.length - 1]?.v || 0;
+  const color = lastVal >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+  wrap.innerHTML = `
+    <svg class="line-svg" width="100%" viewBox="0 0 ${W} ${H + 24}" style="min-width:300px">
+      <defs>
+        <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.25"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <!-- Zero line -->
+      ${minV < 0 && maxV > 0 ? `<line x1="${padX}" y1="${toY(0).toFixed(1)}" x2="${W-padX}" y2="${toY(0).toFixed(1)}" stroke="var(--border)" stroke-dasharray="4 4" stroke-width="1"/>` : ''}
+      <!-- Area -->
+      <path d="${areaD}" fill="url(#lineGrad)"/>
+      <!-- Line -->
+      <path d="${pathD}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- Dots on key points -->
+      ${labels.map(p => {
+        const i = points.indexOf(p);
+        return `<circle cx="${toX(i).toFixed(1)}" cy="${toY(p.v).toFixed(1)}" r="3" fill="${color}" stroke="var(--card)" stroke-width="2"/>`;
+      }).join('')}
+      <!-- X labels -->
+      ${labels.map(p => {
+        const i = points.indexOf(p);
+        const d = new Date(p.d + 'T12:00:00');
+        const lbl = d.toLocaleDateString('ro-MD', { day:'2-digit', month:'short' });
+        return `<text x="${toX(i).toFixed(1)}" y="${H + 16}" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="DM Mono">${lbl}</text>`;
+      }).join('')}
+      <!-- Current value label -->
+      <text x="${toX(points.length-1).toFixed(1)}" y="${(toY(points[points.length-1].v) - 8).toFixed(1)}" text-anchor="end" fill="${color}" font-size="11" font-family="DM Mono" font-weight="500">${fmtShort(lastVal)}</text>
+    </svg>
+  `;
+}
+
+// ── SAVING RATE PER MONTH ────────────────────────────────────
+function renderSavingRate() {
+  const tx = getFilteredTx();
+  const monthly = groupByMonth(tx);
+  const keys = Object.keys(monthly).sort().slice(-6);
+  const panel = document.getElementById('savingRatePanel');
+
+  if (!keys.length) { panel.innerHTML = '<div class="empty-panel"><div class="e-icon">💰</div>Date insuficiente.</div>'; return; }
+
+  panel.innerHTML = keys.map(k => {
+    const inc = monthly[k].income;
+    const exp = monthly[k].expense;
+    const rate = inc > 0 ? Math.max(0, (inc - exp) / inc * 100) : 0;
+    const color = rate >= 20 ? 'var(--accent-green)' : rate >= 10 ? 'var(--accent-gold)' : 'var(--accent-red)';
+    return `
+      <div class="meter-row">
+        <div class="meter-label">${monthName(k)}</div>
+        <div class="meter-bar-wrap"><div class="meter-bar" style="width:${Math.min(rate,100).toFixed(1)}%;background:${color}"></div></div>
+        <div class="meter-val" style="color:${color}">${rate.toFixed(1)}%</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── SPARKLINES per category ──────────────────────────────────
+function renderSparklines() {
+  const tx = getFilteredTx().filter(t => t.type === 'cheltuiala');
+  const panel = document.getElementById('sparkPanel');
+
+  if (!tx.length) { panel.innerHTML = '<div class="empty-panel"><div class="e-icon">⚡</div>Nicio cheltuială.</div>'; return; }
+
+  const monthly = groupByMonth(getFilteredTx());
+  const months = Object.keys(monthly).sort().slice(-6);
+
+  const catTotals = {};
+  tx.forEach(t => { catTotals[t.category] = (catTotals[t.category] || 0) + t.amount; });
+  const topCats = Object.entries(catTotals).sort((a,b) => b[1]-a[1]).slice(0, 6);
+
+  panel.innerHTML = topCats.map(([cat, total]) => {
+    const color = CAT_COLORS[cat] || '#7a8599';
+    const icon = cat.split(' ')[0];
+    const name = cat.split(' ').slice(1).join(' ');
+
+    const monthlyVals = months.map(m => {
+      const mTx = monthly[m]?.txList || [];
+      return mTx.filter(t => t.category === cat).reduce((s,t) => s+t.amount, 0);
+    });
+
+    const maxV = Math.max(...monthlyVals, 1);
+    const W = 80, H = 28;
+    const pts = monthlyVals.map((v, i) => {
+      const x = (i / (monthlyVals.length - 1 || 1)) * W;
+      const y = H - (v / maxV) * H;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    const avgMonthly = monthlyVals.reduce((s,v)=>s+v,0) / (monthlyVals.filter(v=>v>0).length || 1);
+
+    return `
+      <div class="sparkline-row">
+        <div class="spark-icon">${icon}</div>
+        <div class="spark-info">
+          <div class="spark-name">${name}</div>
+          <div class="spark-meta">med. ${fmtShort(avgMonthly)}/lună</div>
+        </div>
+        <svg class="spark-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+          <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+          ${monthlyVals.map((v,i) => {
+            const x = (i/(monthlyVals.length-1||1))*W;
+            const y = H - (v/maxV)*H;
+            return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="${color}"/>`;
+          }).join('')}
+        </svg>
+        <div class="spark-val" style="color:${color}">${fmt(total)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ── HEATMAP ──────────────────────────────────────────────────
+function renderHeatmap() {
+  const wrap = document.getElementById('heatmapWrap');
+  const today = new Date();
+  const numWeeks = 26; // 6 months
+
+  // Build day map
+  const dayMap = {};
+  transactions.filter(t => t.type === 'cheltuiala').forEach(t => {
+    dayMap[t.date] = (dayMap[t.date] || 0) + t.amount;
+  });
+
+  const maxVal = Math.max(...Object.values(dayMap), 1);
+
+  // Start from numWeeks * 7 days ago, aligning to Monday
+  const start = new Date(today);
+  start.setDate(today.getDate() - numWeeks * 7);
+  const dayOfWeek = start.getDay();
+  start.setDate(start.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1)); // align to Monday
+
+  const cols = [];
+  const monthLabels = [];
+  let prevMonth = -1;
+
+  for (let w = 0; w < numWeeks; w++) {
+    const col = [];
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(start);
+      date.setDate(start.getDate() + w * 7 + d);
+      const dateStr = date.toISOString().split('T')[0];
+      const val = dayMap[dateStr] || 0;
+      const intensity = val > 0 ? Math.max(0.15, val / maxVal) : 0;
+      const color = val > 0
+        ? `rgba(255,77,109,${intensity.toFixed(2)})`
+        : 'var(--border)';
+      const title = val > 0 ? `${dateStr}: ${fmt(val)}` : dateStr;
+      col.push({ color, title, date });
+    }
+    cols.push(col);
+
+    // Month label at first week of month
+    const firstDay = col[0].date;
+    if (firstDay.getMonth() !== prevMonth) {
+      prevMonth = firstDay.getMonth();
+      monthLabels.push({ w, label: firstDay.toLocaleDateString('ro-MD', { month: 'short' }) });
+    } else {
+      monthLabels.push({ w, label: '' });
+    }
+  }
+
+  const labelRow = monthLabels.map(m => `<div class="heatmap-month-label" style="min-width:17px">${m.label}</div>`).join('');
+  const grid = cols.map(col => `
+    <div class="heatmap-col">
+      ${col.map(c => `<div class="heatmap-cell" style="background:${c.color}" title="${c.title}"></div>`).join('')}
+    </div>
+  `).join('');
+
+  const legend = [0, 0.25, 0.5, 0.75, 1].map(v => {
+    const color = v > 0 ? `rgba(255,77,109,${Math.max(0.15, v).toFixed(2)})` : 'var(--border)';
+    return `<div style="width:12px;height:12px;border-radius:3px;background:${color}"></div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    <div style="margin-bottom:4px;display:flex;gap:3px">${labelRow}</div>
+    <div class="heatmap-grid">${grid}</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:12px">
+      <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Mai puțin</span>
+      ${legend}
+      <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Mai mult</span>
+    </div>
+  `;
+}
+
+// ── MONTHLY TABLE ────────────────────────────────────────────
+function renderMonthTable() {
+  const tx = getFilteredTx();
+  const monthly = groupByMonth(tx);
+  const keys = Object.keys(monthly).sort().reverse();
+  const table = document.getElementById('monthTable');
+
+  if (!keys.length) {
+    table.innerHTML = '<tr><td class="empty-panel">Date insuficiente.</td></tr>';
+    return;
+  }
+
+  let cumulBalance = 0;
+  const allIncome = transactions.filter(t=>t.type==='intrare').reduce((s,t)=>s+t.amount,0);
+  const allExpense = transactions.filter(t=>t.type==='cheltuiala').reduce((s,t)=>s+t.amount,0);
+  cumulBalance = allIncome - allExpense;
+
+  // compute running balance from oldest to newest
+  const orderedKeys = [...keys].reverse();
+  let running = 0;
+  const balances = {};
+  orderedKeys.forEach(k => {
+    running += monthly[k].income - monthly[k].expense;
+    balances[k] = running;
+  });
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Lună</th>
+        <th>Intrări</th>
+        <th>Cheltuieli</th>
+        <th>Economii nete</th>
+        <th>Rată</th>
+        <th>Sold cumulat</th>
+        <th>Tranzacții</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${keys.map(k => {
+        const inc = monthly[k].income;
+        const exp = monthly[k].expense;
+        const net = inc - exp;
+        const rate = inc > 0 ? (net / inc * 100).toFixed(1) : '0.0';
+        const rateColor = parseFloat(rate) >= 20 ? 'var(--accent-green)' : parseFloat(rate) >= 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
+        const bal = balances[k];
+        const txCount = monthly[k].txList.length;
+        return `
+          <tr>
+            <td style="font-weight:500">${monthName(k)}</td>
+            <td class="trend-td-mono green">+${fmt(inc)}</td>
+            <td class="trend-td-mono red">-${fmt(exp)}</td>
+            <td class="trend-td-mono" style="color:${net>=0?'var(--accent-green)':'var(--accent-red)'}">${net>=0?'+':''}${fmt(net)}</td>
+            <td class="trend-td-mono" style="color:${rateColor}">${rate}%</td>
+            <td class="trend-td-mono blue">${fmt(bal)}</td>
+            <td class="trend-td-mono" style="color:var(--text-muted)">${txCount}</td>
+          </tr>
+        `;
+      }).join('')}
+    </tbody>
+  `;
+}
+
+// ── INVESTMENT STATS ─────────────────────────────────────────
+function renderInvStats() {
+  const panel = document.getElementById('invStatsPanel');
+  if (!investments.length) {
+    panel.innerHTML = '<div class="empty-panel"><div class="e-icon">📊</div>Nicio investiție.</div>';
+    return;
+  }
+
+  const totalInv = investments.reduce((s,i) => s+i.invested, 0);
+  const totalCur = investments.reduce((s,i) => s+i.current, 0);
+  const profit = totalCur - totalInv;
+  const profitPct = totalInv > 0 ? (profit/totalInv*100).toFixed(2) : '0.00';
+  const profitColor = profit >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+
+  const rows = investments.map(inv => {
+    const diff = inv.current - inv.invested;
+    const pct = inv.invested > 0 ? (diff/inv.invested*100).toFixed(1) : '0.0';
+    const color = diff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+    return `
+      <div class="sparkline-row">
+        <div class="spark-icon">${inv.type.split(' ')[0]}</div>
+        <div class="spark-info">
+          <div class="spark-name">${inv.name}</div>
+          <div class="spark-meta">${inv.type.split(' ').slice(1).join(' ')} · investit ${fmt(inv.invested)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--font-mono);font-size:14px;color:var(--accent-blue)">${fmt(inv.current)}</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:${color}">${diff>=0?'+':''}${fmt(diff)} (${diff>=0?'+':''}${pct}%)</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Investit</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:var(--accent-blue)">${fmt(totalInv)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Valoare</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:var(--text-primary)">${fmt(totalCur)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Profit</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:${profitColor}">${profit>=0?'+':''}${fmt(profit)} (${profit>=0?'+':''}${profitPct}%)</div>
+      </div>
+    </div>
+    ${rows}
+  `;
+}
+
+// ── DEBT STATS ───────────────────────────────────────────────
+function renderDebtStats() {
+  const panel = document.getElementById('debtStatsPanel');
+  if (!debts.length) {
+    panel.innerHTML = '<div class="empty-panel"><div class="e-icon">🤝</div>Nicio datorie înregistrată.</div>';
+    return;
+  }
+
+  const active = debts.filter(d => !d.paid);
+  const paid = debts.filter(d => d.paid);
+  const totalOwe = active.filter(d=>d.type==='datorez').reduce((s,d)=>s+d.amount,0);
+  const totalOwed = active.filter(d=>d.type==='mi-se-datoreaza').reduce((s,d)=>s+d.amount,0);
+  const net = totalOwed - totalOwe;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const overdue = active.filter(d => d.due && new Date(d.due+'T12:00:00') < today);
+
+  panel.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)">
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Eu Datorez</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:var(--accent-red)">${fmt(totalOwe)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Mi Se Datorează</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:var(--accent-green)">${fmt(totalOwed)}</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Net</div>
+        <div style="font-family:var(--font-mono);font-size:16px;color:${net>=0?'var(--accent-green)':'var(--accent-red)'}">${net>=0?'+':''}${fmt(net)}</div>
+      </div>
+    </div>
+    ${overdue.length ? `<div style="padding:12px 20px;background:rgba(255,77,109,0.07);border-bottom:1px solid var(--border);font-size:13px;color:var(--accent-red)">⚠️ ${overdue.length} datorie${overdue.length>1?'i':''} depășit${overdue.length>1?'e':''} ca scadență</div>` : ''}
+    ${active.slice(0,5).map(d => {
+      const isOwe = d.type === 'datorez';
+      const dueStr = d.due ? new Date(d.due+'T12:00:00').toLocaleDateString('ro-MD',{day:'2-digit',month:'short'}) : '—';
+      const isOver = d.due && new Date(d.due+'T12:00:00') < today;
+      return `
+        <div class="sparkline-row">
+          <div class="spark-icon">${isOwe ? '😬' : '🤝'}</div>
+          <div class="spark-info">
+            <div class="spark-name">${d.person}</div>
+            <div class="spark-meta">${d.desc || '—'} · scad. ${dueStr} ${isOver?'🔴':''}</div>
+          </div>
+          <div style="font-family:var(--font-mono);font-size:14px;color:${isOwe?'var(--accent-red)':'var(--accent-green)'}">${isOwe?'-':'+'}${fmt(d.amount)}</div>
+        </div>
+      `;
+    }).join('')}
+    <div style="padding:10px 20px;font-size:12px;color:var(--text-muted);border-top:1px solid var(--border)">
+      ${paid.length} datorie${paid.length!==1?'i':''} achitat${paid.length!==1?'e':''} · ${active.length} active
+    </div>
+  `;
+}
+
+function renderAll() {
+  renderKPI();
+  renderBarChart();
+  renderDonut();
+  renderLineChart();
+  renderSavingRate();
+  renderSparklines();
+  renderHeatmap();
+  renderMonthTable();
+  renderInvStats();
+  renderDebtStats();
+}
+
+renderAll();
+
+
+</script>
+</body>
+</html>
