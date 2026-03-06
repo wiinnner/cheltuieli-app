@@ -23,6 +23,72 @@
     --font-body: 'DM Sans', sans-serif;
   }
 
+  /* ── LIGHT THEME ── */
+  body.light {
+    --bg: #f5f6fa;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --border: #e2e6f0;
+    --accent-green: #00b87a;
+    --accent-red: #e03055;
+    --accent-blue: #2b7fff;
+    --accent-gold: #d4900a;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #9ca3af;
+  }
+
+  body.light::before { display: none; }
+
+  body.light .summary-card,
+  body.light .panel,
+  body.light .debts-add-form,
+  body.light .debt-card,
+  body.light .debt-summary-card,
+  body.light .modal,
+  body.light .backup-section,
+  body.light .sstat {
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  }
+
+  body.light .form-input,
+  body.light .form-select,
+  body.light .restore-input {
+    background: #f9fafb;
+  }
+
+  body.light .filter-tab.active,
+  body.light .period-tab.active {
+    background: #e5e7eb;
+  }
+
+  body.light .spa-nav {
+    background: rgba(255,255,255,0.97);
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+  }
+
+  body.light .backup-code-box { background: #f9fafb; }
+  body.light .bstat { background: #f9fafb; }
+  body.light .pct-btn { border-color: #e2e6f0; }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+
+  .theme-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
@@ -1657,51 +1723,404 @@
   .page { display: none; }
   .page.active { display: block; }
 
+  /* ── BOTTOM NAV ── */
   .spa-nav {
     position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 0;
+    left: 0;
+    right: 0;
     display: flex;
-    gap: 6px;
-    background: rgba(22,27,36,0.92);
-    border: 1px solid var(--border);
-    border-radius: 40px;
-    padding: 6px 8px;
-    backdrop-filter: blur(12px);
+    align-items: stretch;
+    background: var(--card);
+    border-top: 1px solid var(--border);
     z-index: 1000;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+    height: 68px;
+    padding: 0 8px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .nav-btn {
-    padding: 9px 20px;
-    border-radius: 30px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
     border: none;
     background: transparent;
     color: var(--text-muted);
     font-family: var(--font-body);
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 500;
+    letter-spacing: 0.3px;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
+    padding: 8px 6px;
+    border-radius: 12px;
+    position: relative;
+    text-transform: uppercase;
+  }
+
+  .nav-btn .nav-icon {
+    font-size: 22px;
+    line-height: 1;
+    transition: transform 0.2s;
   }
 
   .nav-btn.active {
-    background: var(--border);
-    color: var(--text-primary);
+    color: var(--accent-blue);
+  }
+
+  .nav-btn.active .nav-icon {
+    transform: translateY(-2px);
+  }
+
+  .nav-btn.active::after {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(77,159,255,0.12);
+    z-index: -1;
   }
 
   .nav-btn:hover:not(.active) {
     color: var(--text-secondary);
-    background: rgba(255,255,255,0.05);
+  }
+
+  .nav-backup-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border: none;
+    background: transparent;
+    color: var(--accent-gold);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 8px 6px;
+    border-radius: 12px;
+    position: relative;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .nav-backup-btn .nav-icon {
+    font-size: 22px;
+    line-height: 1;
+    transition: transform 0.2s;
+  }
+
+  .nav-backup-btn:hover {
+    opacity: 1;
+    color: var(--accent-gold);
+  }
+
+  .nav-backup-btn:hover .nav-icon {
+    transform: translateY(-2px);
   }
 
   /* Add bottom padding so content doesn't hide behind nav */
-  .app, .stats-app { padding-bottom: 100px !important; }
+  .app, .stats-app { padding-bottom: 90px !important; }
+
+  /* ── BACKUP MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.4);
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+
+  .modal::-webkit-scrollbar { width: 4px; }
+  .modal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .modal-header {
+    padding: 16px 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    z-index: 1;
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .modal-close:hover {
+    background: var(--border);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* Backup stats row */
+  .backup-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .bstat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+
+  .bstat-val {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .bstat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Sections */
+  .backup-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .backup-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .backup-section-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .backup-section-icon.export { background: rgba(0,229,160,0.12); }
+  .backup-section-icon.import { background: rgba(77,159,255,0.12); }
+
+  .backup-section-info { flex: 1; }
+
+  .backup-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .backup-section-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .backup-section-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .backup-code-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent-green);
+    word-break: break-all;
+    max-height: 60px;
+    overflow-y: auto;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+    user-select: all;
+  }
+
+  .backup-code-box::-webkit-scrollbar { width: 3px; }
+  .backup-code-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .backup-btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .backup-action-btn {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .backup-action-btn:hover {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+
+  .backup-action-btn.primary {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+    border-color: transparent;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .backup-action-btn.primary:hover { opacity: 0.88; color: #fff; }
+
+  .backup-action-btn.danger {
+    border-color: rgba(255,77,109,0.25);
+    color: var(--accent-red);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .backup-action-btn.danger:hover {
+    background: rgba(255,77,109,0.12);
+    border-color: var(--accent-red);
+  }
+
+  .restore-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-primary);
+    resize: none;
+    height: 72px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .restore-input:focus { border-color: var(--accent-blue); }
+  .restore-input::placeholder { color: var(--text-muted); }
+
+  .backup-toast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--card);
+    border: 1px solid var(--accent-green);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--accent-green);
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+
+  .backup-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .backup-toast.error { border-color: var(--accent-red); color: var(--accent-red); }
 
 </style>
 </head>
@@ -1714,7 +2133,7 @@
   <header>
     <div class="logo">Finanțe<span>Personale</span></div>
     <div style="display:flex;align-items:center;gap:12px;">
-      <a href="statistici.html" style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text-secondary);font-size:13px;font-family:var(--font-body);cursor:pointer;text-decoration:none;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent-blue)';this.style.color='var(--accent-blue)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-secondary)'">📊 Statistici</a>
+      <button class="theme-toggle" id="themeToggleMain" onclick="toggleTheme()">🌙 Dark</button>
       <div class="date-display" id="dateDisplay"></div>
     </div>
   </header>
@@ -1913,13 +2332,15 @@
     <div>
       <div class="section-title">📈 Investiții</div>
       <div class="panel">
+
+        <!-- Summary top -->
         <div class="inv-summary-row">
           <div class="inv-stat">
-            <div class="inv-stat-label">Investit</div>
+            <div class="inv-stat-label">Total Investit</div>
             <div class="inv-stat-val blue" id="invTotalInvested">0,00 MDL</div>
           </div>
           <div class="inv-stat">
-            <div class="inv-stat-label">Valoare curentă</div>
+            <div class="inv-stat-label">Valoare Curentă</div>
             <div class="inv-stat-val" id="invTotalCurrent">0,00 MDL</div>
           </div>
           <div class="inv-stat">
@@ -1928,11 +2349,14 @@
           </div>
         </div>
 
+        <!-- List of investments -->
         <div class="inv-list" id="invList">
           <div style="color:var(--text-muted);font-size:13px;text-align:center;padding:30px 0;">Nicio investiție adăugată.</div>
         </div>
 
+        <!-- Add investment form - ONLY name + invested amount -->
         <div class="inv-add-form">
+          <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">+ Investiție nouă</div>
           <div class="inv-type-chips" id="invTypeChips">
             <button class="inv-chip active" onclick="selectInvType('📊 Acțiuni')">📊 Acțiuni</button>
             <button class="inv-chip" onclick="selectInvType('₿ Crypto')">₿ Crypto</button>
@@ -1940,19 +2364,16 @@
             <button class="inv-chip" onclick="selectInvType('🏦 Depozit')">🏦 Depozit</button>
             <button class="inv-chip" onclick="selectInvType('🪙 Altele')">🪙 Altele</button>
           </div>
-          <div class="inv-form-grid">
-            <input type="text" class="form-input" id="invName" placeholder="Nume (ex: Bitcoin, BVB…)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+            <input type="text" class="form-input" id="invName" placeholder="Nume (ex: Bitcoin…)" style="font-size:13px;padding:10px 12px;">
             <div style="position:relative">
               <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
-              <input type="number" class="form-input" id="invInvested" placeholder="Investit" min="0" step="0.01" style="padding-left:40px;">
-            </div>
-            <div style="position:relative">
-              <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">MDL</span>
-              <input type="number" class="form-input" id="invCurrent" placeholder="Val. curentă" min="0" step="0.01" style="padding-left:40px;">
+              <input type="number" class="form-input" id="invInvested" placeholder="Suma investită" min="0" step="0.01" style="padding-left:40px;font-size:13px;padding-top:10px;padding-bottom:10px;">
             </div>
           </div>
-          <button class="inv-submit-btn" onclick="addInvestment()">+ Adaugă Investiție</button>
+          <button class="inv-submit-btn" onclick="addInvestment()" style="margin-top:8px;">+ Adaugă Investiție</button>
         </div>
+
       </div>
     </div>
 
@@ -2027,7 +2448,10 @@
 
   <header>
     <div class="logo">Finanțe<span>Personale</span> · <span style="font-size:18px">Statistici</span></div>
-    <a class="back-btn" href="#">← Înapoi la aplicație</a>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="theme-toggle" id="themeToggleStats" onclick="toggleTheme()">🌙 Dark</button>
+      <a class="back-btn" href="#">← Înapoi la aplicație</a>
+    </div>
   </header>
 
   <div class="period-bar">
@@ -2131,26 +2555,123 @@
     </div>
   </div>
 
+  <!-- Row full: Datorii detaliate -->
+  <div class="row-full">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">💸 Datorii — Detaliu Complet</div>
+        <div class="panel-sub" id="debtDetailSub"></div>
+      </div>
+      <div id="debtDetailPanel"></div>
+    </div>
+  </div>
+
 </div>
 
 
 </div>
+
+<!-- BACKUP MODAL -->
+<div class="modal-overlay" id="backupModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">☁️ Backup & Restaurare</div>
+      <button class="modal-close" onclick="closeBackup()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Stats -->
+      <div class="backup-stats" id="backupStats"></div>
+
+      <!-- Export -->
+      <div class="backup-section">
+        <div class="backup-section-header">
+          <div class="backup-section-icon export">📤</div>
+          <div class="backup-section-info">
+            <div class="backup-section-title">Exportă datele</div>
+            <div class="backup-section-desc">Copiază codul sau descarcă fișierul .json</div>
+          </div>
+        </div>
+        <div class="backup-section-body">
+          <div class="backup-code-box" id="backupCode">—</div>
+          <div class="backup-btn-row">
+            <button class="backup-action-btn primary" onclick="copyBackupCode()">📋 Copiază Codul</button>
+            <button class="backup-action-btn" onclick="downloadBackup()">💾 Descarcă .json</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Import -->
+      <div class="backup-section">
+        <div class="backup-section-header">
+          <div class="backup-section-icon import">📥</div>
+          <div class="backup-section-info">
+            <div class="backup-section-title">Restaurează datele</div>
+            <div class="backup-section-desc">Lipește codul sau încarcă fișierul salvat anterior</div>
+          </div>
+        </div>
+        <div class="backup-section-body">
+          <textarea class="restore-input" id="restoreInput" placeholder="Lipește codul de backup aici..."></textarea>
+          <div class="backup-btn-row">
+            <button class="backup-action-btn primary" onclick="restoreFromCode()">✅ Restaurează</button>
+            <label class="backup-action-btn" style="cursor:pointer">
+              📂 Fișier .json
+              <input type="file" accept=".json" style="display:none" onchange="loadBackupFile(event)">
+            </label>
+            <button class="backup-action-btn danger" onclick="clearAllData()">🗑️ Șterge tot</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="backup-toast" id="backupToast"></div>
 
 <!-- NAVIGATION BAR -->
 <nav class="spa-nav">
-  <button class="nav-btn active" id="nav-app" onclick="showPage('app')">🏠 Aplicație</button>
-  <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">📊 Statistici</button>
+  <button class="nav-btn active" id="nav-app" onclick="showPage('app')">
+    <span class="nav-icon">🏠</span>
+    <span>Acasă</span>
+  </button>
+  <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">
+    <span class="nav-icon">📊</span>
+    <span>Statistici</span>
+  </button>
+  <button class="nav-backup-btn" onclick="openBackup()">
+    <span class="nav-icon">☁️</span>
+    <span>Backup</span>
+  </button>
 </nav>
 
 <script>
-// ── SPA Router ──────────────────────────────────────────────
+// ── THEME TOGGLE ─────────────────────────────────────────────
+let isDark = localStorage.getItem('fp_theme') !== 'light';
+
+function applyTheme() {
+  document.body.classList.toggle('light', !isDark);
+  const label = isDark ? '🌙 Dark' : '☀️ Light';
+  ['themeToggleMain','themeToggleStats'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+  localStorage.setItem('fp_theme', isDark ? 'dark' : 'light');
+}
+
+function toggleTheme() {
+  isDark = !isDark;
+  applyTheme();
+}
+// ── END THEME ─────────────────────────────────────────────────
 function showPage(page) {
   document.getElementById('page-app').classList.toggle('active', page === 'app');
   document.getElementById('page-stats').classList.toggle('active', page === 'stats');
   document.getElementById('nav-app').classList.toggle('active', page === 'app');
   document.getElementById('nav-stats').classList.toggle('active', page === 'stats');
   if (page === 'stats') {
-    // Refresh data references from localStorage before rendering stats
     transactions.length = 0;
     JSON.parse(localStorage.getItem('fp_transactions') || '[]').forEach(t => transactions.push(t));
     investments.length = 0;
@@ -2162,6 +2683,147 @@ function showPage(page) {
     renderAll();
   }
 }
+
+// ── BACKUP & RESTORE ─────────────────────────────────────────
+function getAllData() {
+  return {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    transactions:  JSON.parse(localStorage.getItem('fp_transactions')  || '[]'),
+    investments:   JSON.parse(localStorage.getItem('fp_investments')   || '[]'),
+    debts:         JSON.parse(localStorage.getItem('fp_debts')         || '[]'),
+    savings:       JSON.parse(localStorage.getItem('fp_savings')       || '{"goal":0,"pct":10,"history":[]}'),
+    budgets:       JSON.parse(localStorage.getItem('fp_budgets')       || '[]'),
+  };
+}
+
+function openBackup() {
+  const data = getAllData();
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+  document.getElementById('backupCode').textContent = code;
+
+  // Stats
+  document.getElementById('backupStats').innerHTML = `
+    <div class="bstat"><div class="bstat-val">${data.transactions.length}</div><div class="bstat-label">Tranzacții</div></div>
+    <div class="bstat"><div class="bstat-val">${data.investments.length}</div><div class="bstat-label">Investiții</div></div>
+    <div class="bstat"><div class="bstat-val">${data.debts.length}</div><div class="bstat-label">Datorii</div></div>
+    <div class="bstat"><div class="bstat-val">${data.savings.history.length}</div><div class="bstat-label">Depuneri fond</div></div>
+  `;
+
+  document.getElementById('backupModal').classList.add('open');
+}
+
+function closeBackup() {
+  document.getElementById('backupModal').classList.remove('open');
+  document.getElementById('restoreInput').value = '';
+}
+
+// Close modal on overlay click
+document.getElementById('backupModal').addEventListener('click', function(e) {
+  if (e.target === this) closeBackup();
+});
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('backupToast');
+  t.textContent = msg;
+  t.className = 'backup-toast show' + (isError ? ' error' : '');
+  setTimeout(() => { t.className = 'backup-toast'; }, 3000);
+}
+
+function copyBackupCode() {
+  const code = document.getElementById('backupCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    showToast('✅ Codul a fost copiat în clipboard!');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ Codul a fost copiat!');
+  });
+}
+
+function downloadBackup() {
+  const data = getAllData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().split('T')[0];
+  a.href = url;
+  a.download = `finante-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 Fișier descărcat!');
+}
+
+function applyBackupData(data) {
+  if (!data || !data.version) throw new Error('Format invalid');
+  if (data.transactions) localStorage.setItem('fp_transactions', JSON.stringify(data.transactions));
+  if (data.investments)  localStorage.setItem('fp_investments',  JSON.stringify(data.investments));
+  if (data.debts)        localStorage.setItem('fp_debts',        JSON.stringify(data.debts));
+  if (data.savings)      localStorage.setItem('fp_savings',      JSON.stringify(data.savings));
+  if (data.budgets)      localStorage.setItem('fp_budgets',      JSON.stringify(data.budgets));
+
+  // Reload all in-memory arrays
+  transactions.length = 0; data.transactions.forEach(t => transactions.push(t));
+  investments.length  = 0; data.investments.forEach(i => investments.push(i));
+  debts.length        = 0; data.debts.forEach(d => debts.push(d));
+  if (data.savings) { savingsData.goal = data.savings.goal; savingsData.pct = data.savings.pct; savingsData.history = data.savings.history; }
+  if (data.budgets) { budgets.length = 0; data.budgets.forEach(b => budgets.push(b)); }
+
+  render();
+  closeBackup();
+}
+
+function restoreFromCode() {
+  const input = document.getElementById('restoreInput').value.trim();
+  if (!input) { showToast('⚠️ Lipește un cod de backup mai întâi!', true); return; }
+  try {
+    let data;
+    // Try base64 decode first
+    try {
+      data = JSON.parse(decodeURIComponent(escape(atob(input))));
+    } catch {
+      // Maybe it's raw JSON
+      data = JSON.parse(input);
+    }
+    applyBackupData(data);
+    showToast(`✅ ${data.transactions?.length || 0} tranzacții restaurate cu succes!`);
+  } catch(e) {
+    showToast('❌ Cod invalid. Verifică dacă l-ai copiat complet.', true);
+  }
+}
+
+function loadBackupFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      applyBackupData(data);
+      showToast(`✅ ${data.transactions?.length || 0} tranzacții restaurate din fișier!`);
+    } catch {
+      showToast('❌ Fișier invalid sau corupt.', true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function clearAllData() {
+  if (!confirm('Ești sigur? Toate datele vor fi șterse definitiv!')) return;
+  ['fp_transactions','fp_investments','fp_debts','fp_savings','fp_budgets'].forEach(k => localStorage.removeItem(k));
+  transactions.length = 0; investments.length = 0; debts.length = 0;
+  savingsData.goal = 0; savingsData.pct = 10; savingsData.history = [];
+  budgets.length = 0;
+  render();
+  closeBackup();
+  showToast('🗑️ Toate datele au fost șterse.');
+}
+// ── END BACKUP ───────────────────────────────────────────────
 
 // Fix back button in stats page
 document.querySelectorAll('.back-btn').forEach(b => {
@@ -2666,9 +3328,24 @@ function renderDebts() {
 
 // ── INVESTIȚII ─────────────────────────────────────────────
 let investments = JSON.parse(localStorage.getItem('fp_investments') || '[]');
-let currentInvType = '📊 Acțiuni';
 
-function saveInvestments() { localStorage.setItem('fp_investments', JSON.stringify(investments)); }
+// Migrate old format (no history array) to new format
+investments = investments.map(inv => {
+  if (!inv.history) {
+    inv.history = inv.current !== inv.invested
+      ? [{ id: Date.now(), value: inv.current, date: inv.date, note: 'Valoare inițială' }]
+      : [];
+    inv.current = inv.history.length ? inv.history[inv.history.length - 1].value : inv.invested;
+  }
+  return inv;
+});
+
+let currentInvType = '📊 Acțiuni';
+let expandedInvId = null;
+
+function saveInvestments() {
+  localStorage.setItem('fp_investments', JSON.stringify(investments));
+}
 
 function selectInvType(type) {
   currentInvType = type;
@@ -2680,7 +3357,6 @@ function selectInvType(type) {
 function addInvestment() {
   const name = document.getElementById('invName').value.trim();
   const invested = parseFloat(document.getElementById('invInvested').value);
-  const current = parseFloat(document.getElementById('invCurrent').value);
 
   if (!name || isNaN(invested) || invested <= 0) {
     const btn = document.querySelector('.inv-submit-btn');
@@ -2695,25 +3371,61 @@ function addInvestment() {
     type: currentInvType,
     name,
     invested,
-    current: isNaN(current) ? invested : current,
-    date: new Date().toISOString().split('T')[0]
+    current: invested,
+    date: new Date().toISOString().split('T')[0],
+    history: []
   });
 
   saveInvestments();
   renderInvestments();
   document.getElementById('invName').value = '';
   document.getElementById('invInvested').value = '';
-  document.getElementById('invCurrent').value = '';
 }
 
-function updateInvCurrent(id, val) {
-  const inv = investments.find(i => i.id === id);
-  if (inv) { inv.current = parseFloat(val) || inv.invested; saveInvestments(); renderInvestments(); }
+function addInvUpdate(invId) {
+  const inv = investments.find(i => i.id === invId);
+  if (!inv) return;
+  const valEl = document.getElementById(`inv-update-val-${invId}`);
+  const noteEl = document.getElementById(`inv-update-note-${invId}`);
+  const dateEl = document.getElementById(`inv-update-date-${invId}`);
+  const newVal = parseFloat(valEl.value);
+  if (isNaN(newVal) || newVal < 0) {
+    valEl.style.borderColor = 'var(--accent-red)';
+    setTimeout(() => valEl.style.borderColor = '', 1500);
+    return;
+  }
+  inv.history.push({
+    id: Date.now(),
+    value: newVal,
+    date: dateEl.value || new Date().toISOString().split('T')[0],
+    note: noteEl.value.trim() || ''
+  });
+  inv.current = newVal;
+  saveInvestments();
+  renderInvestments();
+  expandedInvId = invId; // keep expanded after update
+  renderInvestments();
+}
+
+function deleteInvUpdate(invId, updateId) {
+  const inv = investments.find(i => i.id === invId);
+  if (!inv) return;
+  inv.history = inv.history.filter(h => h.id !== updateId);
+  inv.current = inv.history.length ? inv.history[inv.history.length - 1].value : inv.invested;
+  saveInvestments();
+  expandedInvId = invId;
+  renderInvestments();
 }
 
 function deleteInvestment(id) {
   investments = investments.filter(i => i.id !== id);
+  if (expandedInvId === id) expandedInvId = null;
   saveInvestments();
+  renderInvestments();
+}
+
+function toggleInvExpand(id) {
+  expandedInvId = expandedInvId === id ? null : id;
   renderInvestments();
 }
 
@@ -2723,7 +3435,10 @@ function renderInvestments() {
   const profit = totalCurrent - totalInvested;
 
   document.getElementById('invTotalInvested').textContent = fmt(totalInvested);
-  document.getElementById('invTotalCurrent').textContent = fmt(totalCurrent);
+  const curEl = document.getElementById('invTotalCurrent');
+  curEl.textContent = fmt(totalCurrent);
+  curEl.style.color = totalCurrent >= totalInvested ? 'var(--accent-green)' : 'var(--accent-red)';
+
   const profEl = document.getElementById('invTotalProfit');
   profEl.textContent = (profit >= 0 ? '+' : '') + fmt(profit);
   profEl.className = 'inv-stat-val ' + (profit > 0 ? 'up' : profit < 0 ? 'down' : 'blue');
@@ -2734,23 +3449,96 @@ function renderInvestments() {
     return;
   }
 
+  const today = new Date().toISOString().split('T')[0];
+
   list.innerHTML = investments.map(inv => {
     const diff = inv.current - inv.invested;
     const pct = inv.invested > 0 ? ((diff / inv.invested) * 100).toFixed(1) : '0.0';
-    const profitClass = diff > 0 ? 'pos' : diff < 0 ? 'neg' : '';
-    const profitSign = diff >= 0 ? '+' : '';
+    const isPos = diff >= 0;
+    const diffColor = diff > 0 ? 'var(--accent-green)' : diff < 0 ? 'var(--accent-red)' : 'var(--text-muted)';
+    const isExpanded = expandedInvId === inv.id;
+
+    // Mini sparkline from history
+    const histVals = [inv.invested, ...inv.history.map(h => h.value)];
+    const sparkW = 60, sparkH = 24;
+    const minV = Math.min(...histVals), maxV = Math.max(...histVals);
+    const range = maxV - minV || 1;
+    const sparkPts = histVals.map((v, i) => {
+      const x = (i / (histVals.length - 1 || 1)) * sparkW;
+      const y = sparkH - ((v - minV) / range) * sparkH;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    // History rows
+    const historyHTML = isExpanded ? `
+      <div style="border-top:1px solid var(--border);padding:12px 16px;background:var(--surface);">
+        <div style="font-size:11px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">Istoric actualizări</div>
+
+        <!-- Invested original -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+          <div>
+            <span style="font-size:12px;color:var(--text-secondary)">🏁 Investiție inițială</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:8px">${inv.date}</span>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent-blue)">${fmt(inv.invested)}</span>
+        </div>
+
+        ${inv.history.map(h => {
+          const hdiff = h.value - inv.invested;
+          const hpct = ((hdiff / inv.invested) * 100).toFixed(1);
+          const hcolor = hdiff >= 0 ? 'var(--accent-green)' : 'var(--accent-red)';
+          return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+            <div style="flex:1;min-width:0">
+              <span style="font-size:12px;color:var(--text-secondary)">${h.note || 'Actualizare valoare'}</span>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:8px">${h.date}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+              <div style="text-align:right">
+                <div style="font-family:var(--font-mono);font-size:13px;color:var(--text-primary)">${fmt(h.value)}</div>
+                <div style="font-family:var(--font-mono);font-size:11px;color:${hcolor}">${hdiff>=0?'+':''}${fmt(hdiff)} (${hpct}%)</div>
+              </div>
+              <button onclick="deleteInvUpdate(${inv.id},${h.id})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;transition:all 0.15s" onmouseover="this.style.color='var(--accent-red)'" onmouseout="this.style.color='var(--text-muted)'">✕</button>
+            </div>
+          </div>`;
+        }).join('')}
+
+        ${inv.history.length === 0 ? '<div style="color:var(--text-muted);font-size:12px;padding:4px 0 8px">Nicio actualizare încă.</div>' : ''}
+
+        <!-- Add update form -->
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;align-items:end">
+          <div style="position:relative">
+            <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:10px;font-family:var(--font-mono)">MDL</span>
+            <input type="number" id="inv-update-val-${inv.id}" class="form-input" placeholder="Valoare nouă" min="0" step="0.01" style="padding-left:38px;font-size:12px;padding-top:9px;padding-bottom:9px;">
+          </div>
+          <input type="text" id="inv-update-note-${inv.id}" class="form-input" placeholder="Notă (opț.)" style="font-size:12px;padding:9px 12px;">
+          <input type="date" id="inv-update-date-${inv.id}" class="form-input" value="${today}" style="font-size:12px;padding:9px 12px;">
+          <button onclick="addInvUpdate(${inv.id})" style="padding:9px 14px;border-radius:10px;border:none;background:var(--accent-blue);color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:var(--font-body)">+ Update</button>
+        </div>
+      </div>
+    ` : '';
+
     return `
-      <div class="inv-item">
-        <div class="inv-icon">${inv.type.split(' ')[0]}</div>
-        <div class="inv-info">
-          <div class="inv-name">${inv.name}</div>
-          <div class="inv-meta">${inv.type.split(' ').slice(1).join(' ')} · ${inv.date}</div>
+      <div class="inv-item" style="flex-direction:column;align-items:stretch;padding:0;cursor:default">
+        <div style="display:flex;align-items:center;padding:14px 16px;cursor:pointer" onclick="toggleInvExpand(${inv.id})">
+          <div class="inv-icon">${inv.type.split(' ')[0]}</div>
+          <div class="inv-info">
+            <div class="inv-name">${inv.name}</div>
+            <div class="inv-meta">${inv.type.split(' ').slice(1).join(' ')} · ${inv.date}</div>
+          </div>
+          <div style="margin-right:10px;">
+            <svg width="${sparkW}" height="${sparkH}" viewBox="0 0 ${sparkW} ${sparkH}">
+              <polyline points="${sparkPts}" fill="none" stroke="${diffColor}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="inv-right">
+            <div class="inv-val" style="color:${diffColor}">${fmt(inv.current)}</div>
+            <div class="inv-profit ${isPos ? 'pos' : 'neg'}">${isPos?'+':''}${fmt(diff)} (${isPos?'+':''}${pct}%)</div>
+          </div>
+          <div style="margin-left:10px;color:var(--text-muted);font-size:12px;transition:transform 0.2s;${isExpanded?'transform:rotate(180deg)':''}">▾</div>
+          <button class="inv-delete" onclick="event.stopPropagation();deleteInvestment(${inv.id})">✕</button>
         </div>
-        <div class="inv-right">
-          <div class="inv-val">${fmt(inv.current)}</div>
-          <div class="inv-profit ${profitClass}">${profitSign}${fmt(diff)} (${profitSign}${pct}%)</div>
-        </div>
-        <button class="inv-delete" onclick="deleteInvestment(${inv.id})">✕</button>
+        ${historyHTML}
       </div>
     `;
   }).join('');
@@ -2857,6 +3645,7 @@ function init() {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
   updateCategoryOptions();
+  applyTheme();
   render();
   renderDebts();
   renderInvestments();
@@ -3435,6 +4224,103 @@ function renderDebtStats() {
   `;
 }
 
+function renderDebtDetail() {
+  const panel = document.getElementById('debtDetailPanel');
+  const sub = document.getElementById('debtDetailSub');
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  if (!debts.length) {
+    panel.innerHTML = '<div class="empty-panel"><div class="e-icon">🤝</div>Nicio datorie înregistrată.</div>';
+    sub.textContent = '';
+    return;
+  }
+
+  const active = debts.filter(d => !d.paid);
+  const paid = debts.filter(d => d.paid);
+  const owe = active.filter(d => d.type === 'datorez');
+  const owing = active.filter(d => d.type === 'mi-se-datoreaza');
+  const totalOwe = owe.reduce((s,d)=>s+d.amount,0);
+  const totalOwing = owing.reduce((s,d)=>s+d.amount,0);
+  const net = totalOwing - totalOwe;
+
+  sub.textContent = `${active.length} active · ${paid.length} achitate`;
+
+  const debtRow = (d) => {
+    const isOwe = d.type === 'datorez';
+    let dueLabel = '';
+    if (d.due) {
+      const dueDate = new Date(d.due + 'T12:00:00');
+      const diff = Math.ceil((dueDate - today) / 86400000);
+      if (d.paid) dueLabel = '';
+      else if (diff < 0) dueLabel = `<span style="color:var(--accent-red);font-size:11px;font-family:var(--font-mono)">🔴 Depășit ${Math.abs(diff)}z</span>`;
+      else if (diff <= 3) dueLabel = `<span style="color:var(--accent-gold);font-size:11px;font-family:var(--font-mono)">⚡ ${diff}z</span>`;
+      else dueLabel = `<span style="color:var(--text-muted);font-size:11px;font-family:var(--font-mono)">📅 ${dueDate.toLocaleDateString('ro-MD',{day:'2-digit',month:'short'})}</span>`;
+    }
+    return `
+      <tr>
+        <td style="font-weight:500;display:flex;align-items:center;gap:8px;padding:11px 16px">
+          ${d.paid ? '<span style="color:var(--accent-green);font-size:11px;border:1px solid;padding:1px 6px;border-radius:4px">✓ Achitat</span>' : (isOwe ? '<span style="background:rgba(255,77,109,0.12);color:var(--accent-red);font-size:10px;padding:2px 8px;border-radius:10px">Eu datorez</span>' : '<span style="background:rgba(0,184,122,0.1);color:var(--accent-green);font-size:10px;padding:2px 8px;border-radius:10px">Mi se datorează</span>')}
+        </td>
+        <td style="padding:11px 16px;font-weight:600">${d.person}</td>
+        <td style="padding:11px 16px;color:var(--text-secondary);font-size:13px">${d.desc || '—'}</td>
+        <td style="padding:11px 16px;font-family:var(--font-mono);font-size:14px;color:${isOwe?'var(--accent-red)':'var(--accent-green)'}">${isOwe?'−':'+'}${fmt(d.amount)}</td>
+        <td style="padding:11px 16px">${dueLabel || '<span style="color:var(--text-muted);font-size:12px">—</span>'}</td>
+        <td style="padding:11px 16px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">${d.createdAt}</td>
+      </tr>
+    `;
+  };
+
+  panel.innerHTML = `
+    <!-- Summary bar -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--border)">
+      <div style="padding:16px 20px;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Eu datorez</div>
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--accent-red);font-weight:500">${fmt(totalOwe)}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">${owe.length} datorie${owe.length!==1?'i':''}</div>
+      </div>
+      <div style="padding:16px 20px;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Mi se datorează</div>
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--accent-green);font-weight:500">${fmt(totalOwing)}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">${owing.length} datorie${owing.length!==1?'i':''}</div>
+      </div>
+      <div style="padding:16px 20px;border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Sold net datorii</div>
+        <div style="font-family:var(--font-mono);font-size:22px;color:${net>=0?'var(--accent-green)':'var(--accent-red)'};font-weight:500">${net>=0?'+':''}${fmt(net)}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">${net>=0?'în favoarea ta':'în defavoarea ta'}</div>
+      </div>
+      <div style="padding:16px 20px;">
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Achitate total</div>
+        <div style="font-family:var(--font-mono);font-size:22px;color:var(--text-secondary);font-weight:500">${paid.length}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">datorii închise</div>
+      </div>
+    </div>
+
+    <!-- Active debts table -->
+    ${active.length ? `
+    <div style="padding:14px 20px 6px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted)">Active</div>
+    <div style="overflow-x:auto">
+      <table class="trend-table" style="width:100%">
+        <thead><tr>
+          <th>Tip</th><th>Persoană</th><th>Motiv</th><th>Sumă</th><th>Scadență</th><th>Data</th>
+        </tr></thead>
+        <tbody>${active.map(debtRow).join('')}</tbody>
+      </table>
+    </div>` : ''}
+
+    <!-- Paid debts table -->
+    ${paid.length ? `
+    <div style="padding:14px 20px 6px;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);border-top:1px solid var(--border);margin-top:8px">Achitate</div>
+    <div style="overflow-x:auto">
+      <table class="trend-table" style="width:100%;opacity:0.6">
+        <thead><tr>
+          <th>Tip</th><th>Persoană</th><th>Motiv</th><th>Sumă</th><th>Scadență</th><th>Data</th>
+        </tr></thead>
+        <tbody>${paid.map(debtRow).join('')}</tbody>
+      </table>
+    </div>` : ''}
+  `;
+}
+
 function renderAll() {
   renderKPI();
   renderBarChart();
@@ -3446,6 +4332,7 @@ function renderAll() {
   renderMonthTable();
   renderInvStats();
   renderDebtStats();
+  renderDebtDetail();
 }
 
 renderAll();
